@@ -1,0 +1,1 @@
+https://maps-data.nrel.gov/geoserver/nrel/ows?outputFormat=SHAPE-ZIP&propertyName=jul_ssh%2Cthe_geom_4326&request=GetFeature&service=WFS&typeName=nrel%3Avbl_ssh_allreg_jul&version=1.0.0

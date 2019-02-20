@@ -1,0 +1,50 @@
+---
+title: "Data visualization SWH"
+author: "Rae Fuhrman"
+date: "2/13/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages & data}
+
+library(tidyverse)
+
+Annual <- read_csv("vbl_ssh_allreg_ann.csv")
+January <- read_csv("vbl_ssh_allreg_jan.csv")
+Feburary <- read_csv("vbl_ssh_allreg_feb.csv")
+March <- read_csv("vbl_ssh_allreg_mar.csv")
+April <- read_csv("vbl_ssh_allreg_apr.csv")
+May <- read_csv("vbl_ssh_allreg_may.csv")
+June <- read_csv("vbl_ssh_allreg_jun.csv")
+July <- read_csv("vbl_ssh_allreg_jul.csv")
+August <- read_csv("vbl_ssh_allreg_aug.csv")
+September <- read_csv("vbl_ssh_allreg_sep.csv")
+October <- read_csv("vbl_ssh_allreg_oct.csv")
+November <- read_csv("vbl_ssh_allreg_nov.csv")
+December <- read_csv("vbl_ssh_allreg_dec.csv")
+
+```
+
+```{r}
+
+library(sf)
+library(tmap)
+library(leaflet)
+library(ggrepel)
+library(ggspatial)
+library(RColorBrewer)
+
+annual_swh <- read_sf (".", layer = "vbl_ssh_allreg_ann") 
+
+%>% 
+  dplyr::select(US_L3NAME) %>% 
+  rename(Region = US_L3NAME) %>% 
+  st_simplify(dTolerance = 100) %>% 
+  st_transform(crs = 4326)
+
+```
+
