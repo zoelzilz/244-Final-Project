@@ -7,7 +7,7 @@ library(leaflet)
 
 # reading in annual wave density geojson file 
 
-annual <- geojsonio::geojson_read("nrel-vbl_wef_allreg_ann.json", what = "sp")
+annual <- geojsonio::geojson_read("nrel-vbl_wef_allreg_ann.json", what = "sp", parse = TRUE)
 
 ## output is a BUNCH OF SHIT including (we think) everything we need
 ## bunch of javascript, retains geometries
@@ -24,3 +24,7 @@ leaflet(annual) %>%
               label = ~paste0(county, ": ", formatC(pop, big.mark = ","))) %>%
   addLegend(pal = pal, values = ~log10(pop), opacity = 1.0,
             labFormat = labelFormat(transform = function(x) round(10^x)))
+
+# other geoJson resources:
+# https://cran.r-project.org/web/packages/geojsonR/vignettes/the_geojsonR_package.html
+# https://gis.stackexchange.com/questions/226760/parse-geojson-file-in-r
