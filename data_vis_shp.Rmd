@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r load packages and data}
 
 library(sf)
 library(tmap)
@@ -17,15 +17,75 @@ library(leaflet)
 library(ggrepel)
 library(ggspatial)
 library(RColorBrewer)
-
+library(fasterize)
+library(raster)
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
 annual_swh
 
+```
+Simple feature collection with 63623 features and 1 field
+geometry type:  POLYGON
+dimension:      XY
+bbox:           xmin: -179.998 ymin: 16.96665 xmax: 179.998 ymax: 63.03335
+epsg (SRID):    4326
+proj4string:    +proj=longlat +datum=WGS84 +no_defs
+
+```{r plot and visualize}
+
 plot(annual_swh)
+range(annual_swh$ann_ssh) #0.09 3.12, must be in meters
+
+## Set up a raster "template" for a 1/12 degree grid
+?extent
+ext <- extent(-179.998, 179.998, 16.96665, 63.03335)
+gridsize <- 0.083
+r <- raster(ext, res=gridsize)
+
+## Rasterize the shapefile
+rr <- rasterize(annual_swh, r, field = "ann_ssh") #this took like 5 minutes
+rr
+
+## Plot raster
+plot(rr, box = FALSE) #scale is 0-60,000... may have multiplied everything by 10,000 i.e. SWH of 6 = 60,000
+#axes = FALSE
+
+##plot raster with fasterize -- MUCH FASTER
+fr <- fasterize(annual_swh, r, field = "ann_ssh") #field is the value for each of the polygons rasterized; default fun = "last" though I'm not sure exactly which one we want
+plot(fr) #different results than rasterize. different scale entirely.
 
 
-#historic kelp beds. 
+##make cropped vector for southern california to rasterize; seems easier to crop the vector first rather than cropping the raster after
+crop_annual <- st_crop(annual_swh, c(xmin=-123, xmax=-118, ymin=32, ymax=38)) #look up exact bounding box from arpa-e
+
+ext1 <- extent(-123, -118, 32, 38)
+gridsize1 <- 0.083
+r1 <- raster(ext1, res=gridsize1)
+
+crop_socal_ras <- fasterize(annual_swh, r1, field = "ann_ssh") 
+plot(crop_socal_ras)
 
 ```
+
+#historic kelp beds layer?
+
+```{r visualize with tmap}
+
+#first make t-map object which we will then plot interactively 
+map_annual <- tm_shape(crop_socal_ras) +   #take this info, make into a tm object, and tell me what to do with it, similar to ggplot
+  tm_fill("ann_ssh", palette = "RdPu", alpha = 0.5)+
+  tm_borders()
+map_annual
+
+tmap_mode("view") #set to interactive viewing
+map_sb_eco
+#leaflet::providers comes up with list of options
+
+tm_basemap("HikeBike.HikeBike")+
+tm_shape(eco_clip)+
+tm_borders(col = "white")
+```
+
+
+
 
