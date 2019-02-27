@@ -19,6 +19,7 @@ library(ggspatial)
 library(RColorBrewer)
 library(fasterize)
 library(raster)
+library(colorspace)
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
 annual_swh
@@ -43,14 +44,14 @@ gridsize <- 0.083
 r <- raster(ext, res=gridsize)
 
 ## Rasterize the shapefile
-rr <- rasterize(annual_swh, r, field = "ann_ssh") #this took like 5 minutes
-rr
+#rr <- rasterize(annual_swh, r, field = "ann_ssh") #this took like 5 minutes
+#rr
 
 ## Plot raster
-plot(rr, box = FALSE) #scale is 0-60,000... may have multiplied everything by 10,000 i.e. SWH of 6 = 60,000
+#plot(rr, box = FALSE) #scale is 0-60,000... may have multiplied everything by 10,000 i.e. SWH of 6 = 60,000
 #axes = FALSE
 
-##plot raster with fasterize -- MUCH FASTER
+##make and plot raster with fasterize -- MUCH FASTER
 fr <- fasterize(annual_swh, r, field = "ann_ssh") #field is the value for each of the polygons rasterized; default fun = "last" though I'm not sure exactly which one we want
 plot(fr) #different results than rasterize. different scale entirely.
 
@@ -71,7 +72,7 @@ crop_socal_ras
 plot(crop_socal_ras)
 
 
-crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this is identical
+crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this method appears identical
 crop_socal_ras2
 #class       : RasterLayer 
 #dimensions  : 72, 60, 4320  (nrow, ncol, ncell)
@@ -83,7 +84,38 @@ plot(crop_socal_ras2)
 
 #historic kelp beds layer?
 
-```{r visualize with ggmap}
+```{r visualize with tmap}
+
+crop_socal_ras2@crs
+
+pal <- choose_palette()
+
+##map with the cropped vector
+annual_map <- tm_shape(crop_annual) +
+  tm_polygons("ann_ssh", title = "Significant Wave Heights in southern California",
+              palette = "RdYlBu") +
+  tm_layout(bg.color = "navyblue", 
+            legend.position = c("right","top"),
+            legend.text.color = "white", 
+            legend.text.size = 0.5) 
+  #tm_shape(islands) +
+  #tm_fill("darkgreen")
+annual_map
+
+##map with the cropped raster
+annual_map2 <- tm_shape(crop_socal_ras2) +
+  tm_raster("layer", title = "Significant Wave Heights in southern California") +
+  tm_layout(bg.color = "navyblue", 
+            legend.position = c("right","top"),
+            legend.text.color = "white", 
+            legend.text.size = 0.5)
+  #tm_shape(islands) +
+  #tm_fill("ann_ssh")
+annual_map2
+#output is smoother without the individual polygons
+?tm_raster
+
+#tmap_save(sst_map, "sst.png", height=5)
 
 
 ```
