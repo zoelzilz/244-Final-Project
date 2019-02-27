@@ -62,28 +62,30 @@ ext1 <- extent(-123, -118, 32, 38)
 gridsize1 <- 0.083
 r1 <- raster(ext1, res=gridsize1)
 
-crop_socal_ras <- fasterize(annual_swh, r1, field = "ann_ssh") 
+crop_socal_ras <- fasterize(annual_swh, r1, field = "ann_ssh") #used non-cropped vector with new cropped raster
+crop_socal_ras
+#class       : RasterLayer 
+#dimensions  : 72, 60, 4320  (nrow, ncol, ncell)
+#resolution  : 0.083, 0.083  (x, y)
+#extent      : -123, -118.02, 32.024, 38  (xmin, xmax, ymin, ymax)
 plot(crop_socal_ras)
+
+
+crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this is identical
+crop_socal_ras2
+#class       : RasterLayer 
+#dimensions  : 72, 60, 4320  (nrow, ncol, ncell)
+#resolution  : 0.083, 0.083  (x, y)
+#extent      : -123, -118.02, 32.024, 38  (xmin, xmax, ymin, ymax)
+plot(crop_socal_ras2)
 
 ```
 
 #historic kelp beds layer?
 
-```{r visualize with tmap}
+```{r visualize with ggmap}
 
-#first make t-map object which we will then plot interactively 
-map_annual <- tm_shape(crop_socal_ras) +   #take this info, make into a tm object, and tell me what to do with it, similar to ggplot
-  tm_fill("ann_ssh", palette = "RdPu", alpha = 0.5)+
-  tm_borders()
-map_annual
 
-tmap_mode("view") #set to interactive viewing
-map_sb_eco
-#leaflet::providers comes up with list of options
-
-tm_basemap("HikeBike.HikeBike")+
-tm_shape(eco_clip)+
-tm_borders(col = "white")
 ```
 
 
