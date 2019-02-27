@@ -90,4 +90,3 @@ plot(crop_socal_ras2)
 
 
 
-
