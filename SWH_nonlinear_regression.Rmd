@@ -40,3 +40,6 @@ hist(residuals(wave_model), xlab='Residuals', main='Quality check')
 summary(wave_model)
 ```
 
+Non-linear equation:
+Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
+
