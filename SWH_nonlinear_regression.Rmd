@@ -1,0 +1,42 @@
+---
+title: "SWH_nonlinear_model"
+author: "Rae Fuhrman"
+date: "2/28/2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import data and packages}
+
+library(readr)
+library(tidyverse)
+library(FSA)
+
+
+SWH_SB_Cavanaugh1 <- read.csv("~/Desktop/Primary Ocean Producers/SWH_SB_Cavanaugh1.csv")
+View(SWH_SB_Cavanaugh1)
+
+
+```
+
+```{r plot data, create model and plot}
+
+plot(SWH_SB_Cavanaugh1)
+
+S <- SWH_SB_Cavanaugh1$Max_Wave_Height
+v <- SWH_SB_Cavanaugh1$Percent_Loss
+mm <- data.frame(S,v)
+
+wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+wave_model
+fitPlot(wave_model, xlab = "Max Wave Height (m)", ylab = "Percent Loss (%)", main = "Winter Kelp Biomass Loss")
+hist(residuals(wave_model), xlab='Residuals', main='Quality check') 
+#8m wave height will be outside the bounds
+summary(wave_model)
+```
+
