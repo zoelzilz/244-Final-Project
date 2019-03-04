@@ -102,13 +102,15 @@ annual_map <- tm_shape(crop_annual) +
   #tm_fill("darkgreen")
 annual_map
 
-##map with the cropped raster
+##map with the cropped raster -- USE FOR HEATMAP
 annual_map2 <- tm_shape(crop_socal_ras2) +
   tm_raster("layer", title = "Significant Wave Heights in southern California") +
   tm_layout(bg.color = "navyblue", 
             legend.position = c("right","top"),
             legend.text.color = "white", 
             legend.text.size = 0.5)
+annual_map2
+
   #tm_shape(islands) +
   #tm_fill("ann_ssh")
 annual_map2
@@ -116,7 +118,6 @@ annual_map2
 ?tm_raster
 
 #tmap_save(sst_map, "sst.png", height=5)
-
 
 ```
 
