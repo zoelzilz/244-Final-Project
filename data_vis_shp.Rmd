@@ -120,5 +120,16 @@ annual_map2
 
 ```
 
+Some plotting stuff that didn't work but I'm a hoarder
+```{r}
+#CA<-readOGR("244-extra", layer="california_county_shape_file") # read the CA state boundary shapefile
+
+#gplot(crop_socal_ras2) +  # will eventually change this to plot(kelploss_ann) but keeping it this way to test)
+ # geom_raster(aes(fill=factor(value),alpha=0.8)) +
+  #scale_fill_viridis_d(na.value = "white")+
+  #geom_polygon(data=CA, aes(x=lon, y = lat),
+   #            fill="gray90",color="grey50", size=1)+
+  #coord_equal()
+```
 
 
