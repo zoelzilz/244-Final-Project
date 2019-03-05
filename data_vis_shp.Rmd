@@ -144,7 +144,7 @@ filter national parks. name redwood nationl forest.
 then still in the same piping, mutate to add new columns called latitude and longitude. mutate(longitude=map.dbl, geometry, sf_centroid (x.)[1])something vaguely like this but not quite
 then use those in the aesthetics of the ggplot to display label names.
 
-use non parametric test, MWU or WSR. filter NA
+use non parametric test, MWU or WSR. filter NA. OR welches t-test, f-test for equal variance, not equal so use welches not student, should just be an arguement var.equal = FALSE or something
 
 Some plotting stuff that didn't work but I'm a hoarder
 ```{r}
