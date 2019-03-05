@@ -22,7 +22,8 @@ library(raster)
 library(colorspace)
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
-annual_swh
+harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
+  st_transform(crs = 4326)
 
 ```
 Simple feature collection with 63623 features and 1 field
@@ -82,7 +83,6 @@ plot(crop_socal_ras2)
 
 ```
 
-#historic kelp beds layer?
 
 ```{r visualize with tmap}
 
@@ -120,6 +120,31 @@ annual_map2
 #tmap_save(sst_map, "sst.png", height=5)
 
 ```
+
+add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
+```{r}
+
+beds_swh <- annual_swh %>% 
+  st_intersection(harvest_beds)
+plot(beds_swh) #doesn't work
+# so this worked but 
+
+
+ggplot(beds_swh)+
+  geom_sf(data = ca_counties, fill = "gray90", color = "gray80", size = 0.2)+
+  geom_sf(aes(fill = Region), color = "NA")+
+  scale_fill_manual(values = c("darkolivegreen2", "darkolivegreen", "gold2"))+
+  coord_sf(xlim = c(-121, -119), ylim= c(33.5, 35.5))+ #trial and error, West is negative, cropped to area
+
+beds_swh2 <- st_intersection(annual_swh, harvest_beds)#clip swh polygons to bounds of harvest_beds polygons
+#both codes do the same thing
+
+```
+filter national parks. name redwood nationl forest.
+then still in the same piping, mutate to add new columns called latitude and longitude. mutate(longitude=map.dbl, geometry, sf_centroid (x.)[1])something vaguely like this but not quite
+then use those in the aesthetics of the ggplot to display label names.
+
+use non parametric test, MWU or WSR. filter NA
 
 Some plotting stuff that didn't work but I'm a hoarder
 ```{r}
