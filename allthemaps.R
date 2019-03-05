@@ -24,8 +24,9 @@ library(rgdal)
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
 #annual_swh
+SWH_SB_Cavanaugh1 <- read_csv("SWH_SB_Cavanaugh1.csv")
 
-ext1 <- extent(-123, -118, 32, 38)
+ext1 <- extent(-120.68, -117.25, 32.15, 34.71)
 gridsize1 <- 0.083
 r1 <- raster(ext1, res=gridsize1)
 
@@ -36,12 +37,17 @@ crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped v
 crop_socal_ras2
 
 kelploss_ann <- crop_socal_ras2 #(ADD IN THE EQUATION HERE) ### here we will add in equation and then plot (rae)
+##is this where we use project raster?
+S <- SWH_SB_Cavanaugh1$Max_Wave_Height
+v <- SWH_SB_Cavanaugh1$Percent_Loss
+mm <- data.frame(S,v)
+wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
 
 
 ### well gplot is being a dumb cunt so I'm going to try using tmap
 
 # TO FINALIZE:
-## - change input data to kelploss_ann (once it's ready)
+## - change input data to kelploss_ann (once it's ready) 
 ## - figure out what our actual "Southern CA" extent is and adjust crop above
 ## - copy paste to the rest of the graphs
 
