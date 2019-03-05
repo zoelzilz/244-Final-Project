@@ -42,7 +42,9 @@ S <- SWH_SB_Cavanaugh1$Max_Wave_Height
 v <- SWH_SB_Cavanaugh1$Percent_Loss
 mm <- data.frame(S,v)
 wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
-
+Non-linear equation:
+Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
+                                  
 
 ### well gplot is being a dumb cunt so I'm going to try using tmap
 
