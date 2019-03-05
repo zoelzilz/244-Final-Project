@@ -1,6 +1,6 @@
 Questions for Allison
 
-Best strategy to create clickable vector data (have two intersecting shapefiles, but do they need to intersect and does that simplify things or make more complex? 
+Best strategy to create clickable vector data (have two intersecting shapefiles, but do they need to intersect and does that simplify things or make more complex? chloropleth
 leaflet and leafletproxy with shapefiles to allow for the clicking of just the harvest bed shapefile, which will then show the average of multiple swh polygons run through the %biomass ~ swh function to give a percent biomass loss in each month in each harvest bed. 
 We could have this output be a simple percentage per month (one widget and output?), and can also output a bar or line graph showing all months biomass loss per harvest bed (second output) with same data.) 
 Is the bar/line graph more complex, or is it just one more step to turn our output into a data.frame and then use ggplot? 
