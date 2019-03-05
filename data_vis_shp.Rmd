@@ -127,7 +127,7 @@ add historic kelp beds layer and figure out how to overlay them (maybe?) such th
 beds_swh <- annual_swh %>% 
   st_intersection(harvest_beds)
 plot(beds_swh) 
-# so this worked but 
+# so this worked but we still probably want to take a mean of the swh in each bed and make new columns for that so that we have one clickable area (each harvest bed) that averages the swh polygons that intersect.  
 
 
 ggplot(beds_swh)+
@@ -140,11 +140,7 @@ beds_swh2 <- st_intersection(annual_swh, harvest_beds)#clip swh polygons to boun
 #both codes do the same thing
 
 ```
-filter national parks. name redwood nationl forest.
-then still in the same piping, mutate to add new columns called latitude and longitude. mutate(longitude=map.dbl, geometry, sf_centroid (x.)[1])something vaguely like this but not quite
-then use those in the aesthetics of the ggplot to display label names.
 
-use non parametric test, MWU or WSR. filter NA. OR welches t-test, f-test for equal variance, not equal so use welches not student, should just be an arguement var.equal = FALSE or something
 
 Some plotting stuff that didn't work but I'm a hoarder
 ```{r}
