@@ -26,24 +26,24 @@ annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-ex
 #annual_swh
 SWH_SB_Cavanaugh1 <- read_csv("SWH_SB_Cavanaugh1.csv")
 
-ext1 <- extent(-120.68, -117.25, 32.15, 34.71)
+ext1 <- extent(-120.68, -117.25, 32.15, 34.71) # SOMETHING IS WRONG WITH THIS BOX?
 gridsize1 <- 0.083
 r1 <- raster(ext1, res=gridsize1)
 
 ##make cropped vector for southern california to rasterize; seems easier to crop the vector first rather than cropping the raster after
-crop_annual <- st_crop(annual_swh, c(xmin=-123, xmax=-118, ymin=32, ymax=38)) #look up exact bounding box from arpa-e
+crop_annual <- st_crop(annual_swh, c(xmin=-120.68, xmax=-117.25, ymin=32.15, ymax=34.71)) #look up exact bounding box from arpa-e
 
 crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this method appears identical
 crop_socal_ras2
 
-kelploss_ann <- crop_socal_ras2 #(ADD IN THE EQUATION HERE) ### here we will add in equation and then plot (rae)
-##is this where we use project raster?
-S <- SWH_SB_Cavanaugh1$Max_Wave_Height
-v <- SWH_SB_Cavanaugh1$Percent_Loss
-mm <- data.frame(S,v)
-wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
-Non-linear equation:
-Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
+kelploss_ann <- (150.422 * crop_socal_ras2) / (3.54 + crop_socal_ras2)  #(ADD IN THE EQUATION HERE) ### here we will add in equation and then plot (rae)
+
+#S <- SWH_SB_Cavanaugh1$Max_Wave_Height
+#v <- SWH_SB_Cavanaugh1$Percent_Loss
+#mm <- data.frame(S,v)
+#wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+#Non-linear equation:
+#Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
                                   
 
 ### well gplot is being a dumb cunt so I'm going to try using tmap
@@ -59,7 +59,7 @@ CA <- read_sf("244-extra", layer = "california_county_shape_file") %>%
 
 tmap_mode("plot")
 
-annual_map <- tm_shape(crop_socal_ras2) +
+annual_map <- tm_shape(kelploss_ann) +
   tm_raster(title = "Heatmap of Annual Kelp Loss")+
   tm_layout(bg.color = "skyblue",
             legend.position = c("left","bottom"),
@@ -70,7 +70,7 @@ annual_map <- tm_shape(crop_socal_ras2) +
   tm_fill("darkgreen")
 
 ## once the graph is finalized:
-tmap_save(annual_map, "annual.png", height = 5)
+tmap_save(annual_map, "annual.png", height = 10)
 
 ############  JANUARY GRAPH ################ ################ ################ ################ ################ ################
 ################ ################ ################ ################ ################ ################

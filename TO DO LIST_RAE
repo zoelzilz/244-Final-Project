@@ -3,13 +3,8 @@ TO DO LIST FOR RAE:
 tomorrow:
 1. Fix raster crop in allthemaps.R (not in datavis markdown) to better represent SoCal --DONE
 2. Incorporate kelp loss equation (again, in allthemaps.R) --equation there, code not finished with project since it seems you know how but if you don't I can figure it out
-3. Copy and paste the annual map code for all 12 months and pull in the shapefiles for those months -- will do once the equation is input correctly
-4. Save those .png files with tmap_save into the www/ folder in the app directory folder -- same as 3
-4b. Zoe can do this if you don't want to... but ... update server.R with filenames for pngs i.e.:
-else if(input$Month == "January"){
-      img(height = 500, width = 300, src = "jan.png")
-      
-      (you'll see this in the server code, it's pretty obvious)
+
+---- zoe will do 3-5 ----
       
 5. Figure out if we need to use qgis to extract the sig wave height data to make the bar graphs on tab 1 (kelp loss by month for a certain *clickable* harvest bed) OR if we can just use the shapefile to make these graphs (idk how but we can figure it out) -- I believe we can convert the shapefile to a dataframe and then plot normally. adding documentation now to googledoc and researching
 

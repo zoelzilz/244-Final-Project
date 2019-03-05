@@ -24,17 +24,13 @@ server <- function(input,output, session){
   })
   
   # first tab
-  # create the leaftlet map 
-  # DEAR RAE
+  # create the leaflet map 
+  
   output$harvestbedmap <- renderLeaflet({
-    vistited %>%
-      leaflet() %>%
-      addProviderTiles("Stamen.TonerLite",
-                       options = providerTileOptions(noWrap = TRUE)) %>%
-      setView(lng = -0.1275, lat = 51.5072, zoom = 13) %>%
-      addCircles(radius = ~2.2*visits, popup = popup, stroke = T,
-                 fillColor = DarkBlue,
-                 fillOpacity = 0.75)  
+    m <- leaflet() %>% 
+      addTiles() %>% 
+      setView(lng = 33.95851, lat = -118.5204798, zoom = 8.32)
+    m
     })
   
   # bar chart output for first tab

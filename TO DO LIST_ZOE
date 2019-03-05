@@ -1,0 +1,13 @@
+
+
+TAB 2 TASKS
+
+3. Copy and paste the annual map code for all 12 months and pull in the shapefiles for those months -- will do once the equation is input correctly
+4. Save those .png files with tmap_save into the www/ folder in the app directory folder -- same as 3
+4b. Zoe can do this if you don't want to... but ... update server.R with filenames for pngs i.e.:
+else if(input$Month == "January"){
+      img(height = 500, width = 300, src = "jan.png")
+      
+      (you'll see this in the server code, it's pretty obvious)
+      
+AND THEN TAB 2 IS DONE

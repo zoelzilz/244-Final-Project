@@ -126,7 +126,7 @@ add historic kelp beds layer and figure out how to overlay them (maybe?) such th
 
 beds_swh <- annual_swh %>% 
   st_intersection(harvest_beds)
-plot(beds_swh) #doesn't work
+plot(beds_swh) 
 # so this worked but 
 
 
