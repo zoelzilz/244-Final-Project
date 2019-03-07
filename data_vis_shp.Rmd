@@ -5,6 +5,8 @@ date: "2/20/2019"
 output: html_document
 ---
 
+add to to do: put all shapefiles together and create a new column that says month
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -20,6 +22,7 @@ library(RColorBrewer)
 library(fasterize)
 library(raster)
 library(colorspace)
+library(leaflet.minicharts)
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
 harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 

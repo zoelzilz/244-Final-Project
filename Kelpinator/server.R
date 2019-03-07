@@ -29,9 +29,9 @@ server <- function(input,output, session){
   output$harvestbedmap <- renderLeaflet({
     m <- leaflet() %>% 
       addTiles() %>% 
-      setView(lng = 33.95851, lat = -118.5204798, zoom = 8.32)
+      setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) #pick a prettier basemap
     m
-    })
+    )}
   
   # bar chart output for first tab
   #output$barchart <- renderPlot({
