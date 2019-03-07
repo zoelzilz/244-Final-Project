@@ -20,8 +20,22 @@ library(RColorBrewer)
 library(fasterize)
 library(raster)
 library(colorspace)
+library(maptools)
 
-annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
+annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_swh <- read_sf ("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_swh <- read_sf ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+
 harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
   st_transform(crs = 4326)
 
@@ -121,6 +135,14 @@ annual_map2
 
 ```
 
+
+```{r}
+
+
+
+```
+
+
 add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
 ```{r}
 
@@ -128,7 +150,6 @@ beds_swh <- annual_swh %>%
   st_intersection(harvest_beds)
 plot(beds_swh) 
 # so this worked but we still probably want to take a mean of the swh in each bed and make new columns for that so that we have one clickable area (each harvest bed) that averages the swh polygons that intersect.  
-
 
 ggplot(beds_swh)+
   geom_sf(data = ca_counties, fill = "gray90", color = "gray80", size = 0.2)+
