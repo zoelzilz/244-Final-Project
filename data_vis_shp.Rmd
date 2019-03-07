@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load packages and data}
 
 library(sf)
+library(sp)
 library(tmap)
 library(leaflet)
 library(ggrepel)
@@ -22,28 +23,35 @@ library(RColorBrewer)
 library(fasterize)
 library(raster)
 library(colorspace)
-<<<<<<< HEAD
 library(maptools)
+library(leaflet.minicharts)
+library(rgdal)
+
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
 jan_swh <- read_sf ("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
 feb_swh <- read_sf ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+mar_swh <- read_sf ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_swh <- read_sf ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_swh <- read_sf ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_swh <- read_sf ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_swh <- read_sf ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_swh <- read_sf ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_swh <- read_sf ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_swh <- read_sf ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_swh <- read_sf ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
 dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-=======
-library(leaflet.minicharts)
->>>>>>> 681b56f429c9c10151de325f4c0f6849da47cce9
+
+
+annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
 
 harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
   st_transform(crs = 4326)
+
+harvest_beds_ogr <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 ```
 Simple feature collection with 63623 features and 1 field
@@ -144,13 +152,65 @@ annual_map2
 
 ```{r}
 
+class(jan_swh)
+class(jan_ogr) #reads in as "spatialpolygonsdataframe"
+nrow(annual_swh)#all have 63623 rows
+row.names(annual_swh)
+row.names(jan_swh) #currently row names are the same, need to be different (unique IDs)
+
+n <- length(slot(jan_ogr, "polygons"))####neither column is slot name in sf nor polygons with jan_swh, works with ogr read in style because spatialpolygondataframe. outputs 63623 which is correct.
+u_jan_swh <- spChFIDs(jan_ogr, as.character(n))#replaces ID's, in this case with length of original df --- Error in spChFIDs(SP, x) : lengths differ
+row.names(jan_ogr)
+row.names(annual_ogr)#they do match
+
+?spRbind
+?spChFIDs
+##sneaky way using taRifx.geo package
+names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
+names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
+annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
+#Error in match.names(clabs, names(xi)) : names do not match previous names
+#########column names for swh are different, ann_ssh vs. jan_ssh --> need to make match to do rbind
+##while this works, I would have to bind one at a time
+names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
+annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
 
 
+
+ann_Jan <- rbind(annual_swh, jan_swh, fix.duplicated.IDs = TRUE)#Error: arguments have different crs but they are both in 4326
+ann_Jan <- rbind(annual_ogr, jan_ogr, makeUniqueIDs = TRUE) #error, only accepts SPDF but it is an SPDF
+ann_Jan <- rbind(annual_swh, jan_swh, makeUniqueIDs = TRUE)#Error: arguments have different crs but they are both in 4326
+
+##https://gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
+getSlots(class(jan_ogr))
+class(slot(jan_ogr, "polygons")[[1]])
+getSlots(class(slot(jan_ogr, "polygons")[[1]])) #ID is already a character, polygons are a list
+#So to get all ID's
+sapply(slot(jan_ogr, "polygons"), function(x) slot(x, "ID"))
+#or
+rownames(as(jan_ogr, "data.frame"))
+makeUniform<-function(SPDF){
+  pref<-substitute(SPDF)  #just putting the file name in front.
+  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
+  return(newSPDF)
+}
+#newIDs<-lapply(lst,function(x) makeUniform(x))
 ```
 
 
 add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
 ```{r}
+
+ogr_annual_intersect <- annJan %>% 
+  intersect(harvest_beds)#non identical CRS again even though they do
+
+ogr_annual_intersect <- annJan %>% #works with this one
+  intersect(harvest_beds_ogr) #intersect is in raster package
+plot(ogr_annual_intersect) #it worked! I think
+
+ogr_annual_intersect2 <- annFeb %>% #also worked, but is pretty slow. lets make sure leaflet likes these SPDF before I finish the rest of the code
+  intersect(harvest_beds_ogr)  #will need to clip one of these to get proper extent
+
 
 beds_swh <- annual_swh %>% 
   st_intersection(harvest_beds)
@@ -167,6 +227,14 @@ beds_swh2 <- st_intersection(annual_swh, harvest_beds)#clip swh polygons to boun
 #both codes do the same thing
 
 ```
+
+
+
+
+
+
+
+
 
 
 Some plotting stuff that didn't work but I'm a hoarder
