@@ -198,7 +198,6 @@ makeUniform<-function(SPDF){
 ```
 
 
-add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
 ```{r}
 
 ogr_annual_intersect <- annJan %>% 
@@ -211,6 +210,11 @@ plot(ogr_annual_intersect) #it worked! I think
 ogr_annual_intersect2 <- annFeb %>% #also worked, but is pretty slow. lets make sure leaflet likes these SPDF before I finish the rest of the code
   intersect(harvest_beds_ogr)  #will need to clip one of these to get proper extent
 
+```
+
+
+add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
+```{r}
 
 beds_swh <- annual_swh %>% 
   st_intersection(harvest_beds)
