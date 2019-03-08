@@ -26,6 +26,9 @@ library(colorspace)
 library(maptools)
 library(leaflet.minicharts)
 library(rgdal)
+library(taRifx.geo)
+library(tidyverse)
+
 
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
@@ -46,6 +49,18 @@ dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decP
 annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
 jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
 feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+beep(1)
+##
+mar_ogr <- readOGR ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_ogr <- readOGR ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_ogr <- readOGR ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_ogr <- readOGR ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_ogr <- readOGR ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_ogr <- readOGR ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_ogr <- readOGR ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
+dec_ogr <- readOGR ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
 
 harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
   st_transform(crs = 4326)
@@ -152,6 +167,8 @@ annual_map2
 
 ```{r}
 
+###################### beginning of code used to intersect all of our shapefiles? ###########
+
 class(jan_swh)
 class(jan_ogr) #reads in as "spatialpolygonsdataframe"
 nrow(annual_swh)#all have 63623 rows
@@ -165,7 +182,20 @@ row.names(annual_ogr)#they do match
 
 ?spRbind
 ?spChFIDs
+
 ##sneaky way using taRifx.geo package
+#install.packages("devtools")
+#library(devtools)
+#install_github("gsk3/taRifx.geo")
+library(taRifx.geo)
+
+############ start
+
+#currently not working, not sure why
+annual_ogr@data <- annual_ogr@data %>%
+  mutate(month, "Annual" )
+
+
 names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
 names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
 annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
@@ -176,6 +206,7 @@ names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
 annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
 
 
+### not working included below ##
 
 ann_Jan <- rbind(annual_swh, jan_swh, fix.duplicated.IDs = TRUE)#Error: arguments have different crs but they are both in 4326
 ann_Jan <- rbind(annual_ogr, jan_ogr, makeUniqueIDs = TRUE) #error, only accepts SPDF but it is an SPDF
@@ -209,6 +240,8 @@ plot(ogr_annual_intersect) #it worked! I think
 
 ogr_annual_intersect2 <- annFeb %>% #also worked, but is pretty slow. lets make sure leaflet likes these SPDF before I finish the rest of the code
   intersect(harvest_beds_ogr)  #will need to clip one of these to get proper extent
+
+## question from Zoe: by proper extent we mean just southern california, correct?
 
 ```
 
