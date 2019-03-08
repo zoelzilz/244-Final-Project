@@ -28,7 +28,8 @@ library(leaflet.minicharts)
 library(rgdal)
 library(taRifx.geo)
 library(tidyverse)
-
+library(beepr)
+library(praise)
 
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
@@ -49,8 +50,6 @@ dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decP
 annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
 jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
 feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
-beep(1)
-##
 mar_ogr <- readOGR ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
 apr_ogr <- readOGR ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
 may_ogr <- readOGR ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
@@ -61,6 +60,7 @@ sep_ogr <- readOGR ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepP
 oct_ogr <- readOGR ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
 nov_ogr <- readOGR ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
 dec_ogr <- readOGR ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+beep(2)
 
 harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
   st_transform(crs = 4326)
@@ -167,85 +167,76 @@ annual_map2
 
 ```{r}
 
-###################### beginning of code used to intersect all of our shapefiles? ###########
-
-class(jan_swh)
-class(jan_ogr) #reads in as "spatialpolygonsdataframe"
-nrow(annual_swh)#all have 63623 rows
-row.names(annual_swh)
-row.names(jan_swh) #currently row names are the same, need to be different (unique IDs)
-
-n <- length(slot(jan_ogr, "polygons"))####neither column is slot name in sf nor polygons with jan_swh, works with ogr read in style because spatialpolygondataframe. outputs 63623 which is correct.
-u_jan_swh <- spChFIDs(jan_ogr, as.character(n))#replaces ID's, in this case with length of original df --- Error in spChFIDs(SP, x) : lengths differ
-row.names(jan_ogr)
-row.names(annual_ogr)#they do match
-
-?spRbind
-?spChFIDs
-
 ##sneaky way using taRifx.geo package
 #install.packages("devtools")
 #library(devtools)
 #install_github("gsk3/taRifx.geo")
-library(taRifx.geo)
 
 ############ start
 
-#currently not working, not sure why
-annual_ogr@data <- annual_ogr@data %>%
-  mutate(month, "Annual" )
+annual_ogr@data <- mutate(annual_ogr@data, month = "Annual")
+jan_ogr@data <- mutate(jan_ogr@data, month = "January")
+feb_ogr@data <- mutate(feb_ogr@data, month = "February")
+mar_ogr@data <- mutate(mar_ogr@data, month = "March")
+apr_ogr@data <- mutate(apr_ogr@data, month = "April")
+may_ogr@data <- mutate(may_ogr@data, month = "May")
+jun_ogr@data <- mutate(jun_ogr@data, month = "June")
+jul_ogr@data <- mutate(jul_ogr@data, month = "July")
+aug_ogr@data <- mutate(aug_ogr@data, month = "August")
+sep_ogr@data <- mutate(sep_ogr@data, month = "September")
+oct_ogr@data <- mutate(oct_ogr@data, month = "October")
+nov_ogr@data <- mutate(nov_ogr@data, month = "November")
+dec_ogr@data <- mutate(dec_ogr@data, month = "December")
 
-
+##reset all names to ssh so they all match
 names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
 names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
-annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
-#Error in match.names(clabs, names(xi)) : names do not match previous names
-#########column names for swh are different, ann_ssh vs. jan_ssh --> need to make match to do rbind
-##while this works, I would have to bind one at a time
 names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
+names(mar_ogr)[names(mar_ogr)=="mar_ssh"] <- "ssh"
+names(apr_ogr)[names(apr_ogr)=="apr_ssh"] <- "ssh"
+names(may_ogr)[names(may_ogr)=="may_ssh"] <- "ssh"
+names(jun_ogr)[names(jun_ogr)=="jun_ssh"] <- "ssh"
+names(jul_ogr)[names(jul_ogr)=="jul_ssh"] <- "ssh"
+names(aug_ogr)[names(aug_ogr)=="aug_ssh"] <- "ssh"
+names(sep_ogr)[names(sep_ogr)=="sep_ssh"] <- "ssh"
+names(oct_ogr)[names(oct_ogr)=="oct_ssh"] <- "ssh"
+names(nov_ogr)[names(nov_ogr)=="nov_ssh"] <- "ssh"
+names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
+
+##now bind them all once at a time 
+annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
 annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
+annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
+annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
+annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
+annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
+annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
+annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
+annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
+beep(5)
 
 
-### not working included below ##
-
-ann_Jan <- rbind(annual_swh, jan_swh, fix.duplicated.IDs = TRUE)#Error: arguments have different crs but they are both in 4326
-ann_Jan <- rbind(annual_ogr, jan_ogr, makeUniqueIDs = TRUE) #error, only accepts SPDF but it is an SPDF
-ann_Jan <- rbind(annual_swh, jan_swh, makeUniqueIDs = TRUE)#Error: arguments have different crs but they are both in 4326
-
-##https://gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
-getSlots(class(jan_ogr))
-class(slot(jan_ogr, "polygons")[[1]])
-getSlots(class(slot(jan_ogr, "polygons")[[1]])) #ID is already a character, polygons are a list
-#So to get all ID's
-sapply(slot(jan_ogr, "polygons"), function(x) slot(x, "ID"))
-#or
-rownames(as(jan_ogr, "data.frame"))
-makeUniform<-function(SPDF){
-  pref<-substitute(SPDF)  #just putting the file name in front.
-  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
-  return(newSPDF)
-}
-#newIDs<-lapply(lst,function(x) makeUniform(x))
 ```
 
 
 ```{r}
 
-library(raster)
+#ogr_annual_intersect <- annJan %>% 
+  #intersect(harvest_beds)#non identical CRS again even though they do
 
-ogr_annual_intersect <- annJan %>% 
-  intersect(harvest_beds)#non identical CRS again even though they do
+#ogr_annual_intersect <- annJan %>% #works with this one
+  #raster::intersect(harvest_beds_ogr) #intersect is in raster package
+#plot(ogr_annual_intersect) #it worked! I think
 
-ogr_annual_intersect <- annJan %>% #works with this one
-  intersect(harvest_beds_ogr) #intersect is in raster package
-plot(ogr_annual_intersect) #it worked! I think
-
-ogr_annual_intersect2 <- annFeb %>% #also worked, but is pretty slow. lets make sure leaflet likes these SPDF before I finish the rest of the code
-  intersect(harvest_beds_ogr)  #will need to clip one of these to get proper extent
-
-## question from Zoe: by proper extent we mean just southern california, correct?
+ogr_annual_intersect2 <- annDec %>% 
+  raster::intersect(harvest_beds_ogr) %>%  
+  mutate(kelp_loss = (150.422 * ssh) / (3.54 + ssh))
 
 ```
+
 
 
 add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
@@ -270,12 +261,6 @@ beds_swh2 <- st_intersection(annual_swh, harvest_beds)#clip swh polygons to boun
 
 
 
-
-
-
-
-
-
 Some plotting stuff that didn't work but I'm a hoarder
 ```{r}
 #CA<-readOGR("244-extra", layer="california_county_shape_file") # read the CA state boundary shapefile
@@ -286,6 +271,43 @@ Some plotting stuff that didn't work but I'm a hoarder
   #geom_polygon(data=CA, aes(x=lon, y = lat),
    #            fill="gray90",color="grey50", size=1)+
   #coord_equal()
+
+### not working included below ##
+ann_Jan <- rbind(annual_swh, jan_swh, fix.duplicated.IDs = TRUE)#Error: arguments have different crs but they are both in 4326
+ann_Jan <- rbind(annual_ogr, jan_ogr, makeUniqueIDs = TRUE) #error, only accepts SPDF but it is an SPDF
+ann_Jan <- rbind(annual_swh, jan_swh, makeUniqueIDs = TRUE)#Error: arguments have different crs but they are both in 4326
+
+##https://gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
+getSlots(class(jan_ogr))
+class(slot(jan_ogr, "polygons")[[1]])
+getSlots(class(slot(jan_ogr, "polygons")[[1]])) #ID is already a character, polygons are a list
+#So to get all ID's
+sapply(slot(jan_ogr, "polygons"), function(x) slot(x, "ID"))
+#or
+rownames(as(jan_ogr, "data.frame"))
+makeUniform<-function(SPDF){
+  pref<-substitute(SPDF)  #just putting the file name in front.
+  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
+  return(newSPDF)
+}
+#newIDs<-lapply(lst,function(x) makeUniform(x))
+
+###################### beginning of code used to intersect all of our shapefiles? ###########
+
+class(jan_swh)
+class(jan_ogr) #reads in as "spatialpolygonsdataframe"
+nrow(annual_swh)#all have 63623 rows
+row.names(annual_swh)
+row.names(jan_swh) #currently row names are the same, need to be different (unique IDs)
+
+n <- length(slot(jan_ogr, "polygons"))####neither column is slot name in sf nor polygons with jan_swh, works with ogr read in style because spatialpolygondataframe. outputs 63623 which is correct.
+u_jan_swh <- spChFIDs(jan_ogr, as.character(n))#replaces ID's, in this case with length of original df --- Error in spChFIDs(SP, x) : lengths differ
+row.names(jan_ogr)
+row.names(annual_ogr)#they do match
+
+?spRbind
+?spChFIDs
 ```
+
 
 
