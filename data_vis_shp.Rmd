@@ -26,6 +26,9 @@ library(colorspace)
 library(maptools)
 library(leaflet.minicharts)
 library(rgdal)
+install.packages("devtools")
+library(devtools)
+install_github("gsk3/taRifx.geo")
 library(taRifx.geo)
 library(tidyverse)
 library(beepr)
@@ -67,6 +70,7 @@ harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>%
 
 harvest_beds_ogr <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
 harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+beep(2)
 
 ```
 Simple feature collection with 63623 features and 1 field
@@ -187,6 +191,7 @@ sep_ogr@data <- mutate(sep_ogr@data, month = "September")
 oct_ogr@data <- mutate(oct_ogr@data, month = "October")
 nov_ogr@data <- mutate(nov_ogr@data, month = "November")
 dec_ogr@data <- mutate(dec_ogr@data, month = "December")
+beep(2)
 
 ##reset all names to ssh so they all match
 names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
@@ -207,14 +212,19 @@ names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
 annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
 annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
 annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
 annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
 annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
 annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
 annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
 beep(5)
 
@@ -232,8 +242,34 @@ beep(5)
 #plot(ogr_annual_intersect) #it worked! I think
 
 ogr_annual_intersect2 <- annDec %>% 
-  raster::intersect(harvest_beds_ogr) %>%  
+  raster::intersect(harvest_beds_ogr)
+beep(5)
+
+#mutate does not pipe in/work concurrently with intersect
+
+ogr_annual_intersect2@data<- ogr_annual_intersect2@data %>% 
   mutate(kelp_loss = (150.422 * ssh) / (3.54 + ssh))
+beep(5)
+
+head(ogr_annual_intersect2@data)
+
+# i'm going to  make this into a spatial polygons dataset now called kelp_intersected
+# and then hopefully we will never need to run this code ever again
+
+writeOGR(ogr_annual_intersect2, dsn = ".", layer = "kelp_intersected", driver = "ESRI Shapefile")
+beep(2)
+# object, dsn, layer (is the filename), driver (needs to be ESRI Shapefile (capital S) always I think), [there are more options but they're complicated and i'm scared]
+# went super fast
+
+# this is disconcerting
+
+#Warning 1: Value 392241961.796999991 of field Shape_Area of feature 1 not successfully written. Possibly due to too larger number with respect to field width
+#......
+#Warning 1: Value 238887172.344999999 of field Shape_Area of feature 1349 not successfully written. Possibly due to too larger number with respect to field width
+#Warning 1: Value 238887172.344999999 of field Shape_Area of feature 1350 not successfully written. Possibly due to too larger number with respect to field width
+#Warning 1: Value 167564295.451000005 of field Shape_Area of feature 1351 not successfully written. Possibly due to too larger number with respect to field width
+#More than 1000 errors or warnings have been reported. No more will be reported from now.
+
 
 ```
 

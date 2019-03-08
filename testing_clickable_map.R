@@ -1,8 +1,9 @@
 library(leaflet)
 library(shiny)
 library(ggplot2)
-library(sf)
+#library(sf)
 library(tidyverse)
+library(rgdal)
 
 
 # not using this data ##########################################################
@@ -20,18 +21,12 @@ library(tidyverse)
 # the data we need is a SpatialPolygonsDataframe, created in another script (currently in the data_vis_shp.Rmd)
 
 # it is called:
-ogr_annual_intersect2
+kelp_intersected <- readOGR(".", layer = "kelp_intersected")
 
-# can easily view and access dataframe within using 
-ogr_annual_intersect2@data <- ogr_annual_intersect2@data %>% 
-  mutate(random_variable = sample(1:50, 1893, replace = TRUE))
-
-# ssh is our significant wave height
-
-
-ogr_annual_intersect2
-
-
+# can easily view and access dataframe within using @
+# kelp_loss is our dependent variable
+# do NOT View() the entire shapefile!!
+# only View(kelp_intersected@data) or in pieces because this badboy WILL take 15 minutes to load and then crash your computer
 
 ui <- fluidPage(column(7, leafletOutput("harvestbedmap", height = "1000")),
                 column(5, plotOutput("plot", height = "600px"))
@@ -42,16 +37,22 @@ ui <- fluidPage(column(7, leafletOutput("harvestbedmap", height = "1000")),
 
 #creating bins for adding binned color to maps # not even remotely necessary #
 
-bins <- seq(1,3, 0.05) # based on sig wave height, need smaller bins
+max(kelp_intersected@data$kelp_loss)
+#68.37364
+
+min(kelp_intersected@data$kelp_loss)
+#8.423632
+
+bins <- seq(8,68, 1) # based on kelp_loss, need to seq from min to max
 
 
-# defining a color palette, again, unnecessary 
-pal <- colorBin("YlOrRd", domain = ogr_annual_intersect2@data$ssh, bins = bins)
+# defining a color palette, which needs to have at least 68 colors
+pal <- colorBin("YlOrRd", domain = kelp_intersected@data$kelp_loss, bins = bins)
 
 # setting up labels
 labels <- sprintf(
   "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
-  ogr_annual_intersect2@data$KelpBed, ogr_annual_intersect2@data$ssh
+  kelp_intersected@data$KelpBed, kelp_intersected@data$kelp_loss
 ) %>% lapply(htmltools::HTML)
 
 ###########################################################################
@@ -60,9 +61,9 @@ server <- function(input, output) {
   
   ## leaflet map
   output$harvestbedmap <- renderLeaflet({
-    leaflet(ogr_annual_intersect2) %>% 
+    leaflet(kelp_intersected) %>% 
       addTiles() %>% 
-      addPolygons(data =, fillColor = ~pal(ssh),
+      addPolygons(data =, fillColor = ~pal(kelp_loss),
                   weight = 2,
                   opacity = 1,
                   color = "white",
@@ -74,7 +75,7 @@ server <- function(input, output) {
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = TRUE),
-                  layerId = ~unique(ssh),
+                  layerId = ~unique(kelp_loss),
                   label = labels,
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -88,13 +89,13 @@ server <- function(input, output) {
   # generate data in reactive
   ggplot_data <- reactive({
     #print(input$harvestbedmap_shape_click)
-    sigwave <- input$harvestbedmap_shape_click$id
-    ogr_annual_intersect2@data[ogr_annual_intersect2@data$ssh %in% sigwave,]
+    kelp <- input$harvestbedmap_shape_click$id
+    kelp_intersected@data[kelp_intersected@data$kelp_loss %in% kelp,]
   })
 
   
   output$plot <- renderPlot({
-    ggplot(data = ggplot_data(), aes(ssh)) +
+    ggplot(data = ggplot_data(), aes(kelp_loss)) +
       geom_bar()
   }) 
 }
