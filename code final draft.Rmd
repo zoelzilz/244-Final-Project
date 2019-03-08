@@ -1,0 +1,36 @@
+---
+title: "Code Final Draft"
+author: "Zoe Zilz"
+date: "March 7, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Data Wrangling
+
+```{r}
+
+```
+
+
+##Server
+
+```{r}
+
+```
+
+##UI
+
+```{r}
+
+```
+
+##Global
+
+```{r}
+
+```
+

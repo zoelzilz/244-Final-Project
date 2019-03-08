@@ -11,3 +11,32 @@ else if(input$Month == "January"){
       (you'll see this in the server code, it's pretty obvious)
       
 AND THEN TAB 2 IS DONE
+
+ideas:
+
+map has three layers
+1) clickable polygons with loss by month output
+2) historical kelp beds
+3) actual kelp biomass
+
+to do tomorrow:
+
+(1)rbind everything together in the data vis 
+- run top chunk with data
+- skip raster 1 and 2
+- run third chunk with mutations and name changing and rbinding
+-separate chunks, run only the last intersect
+
+(1b) SAVE into new spatial polygons dataset using writeOGR
+
+(2) finish making all the heatmaps now that the extents are correct
+- save them to /www folder
+
+(3) plug new HUGE rbinded spatial polygon dataset into app and see if it runs without burning to the ground
+- just replace ogr_annual_intersect2 and MAKE SURE to replace all instances of ssh with "kelploss" or whatever we name it
+
+(4) get Tom's kelp data and play with it
+
+(5) add layer with kelp beds (from separate dataset that we already have somewehre)
+
+(6) make it all pretty

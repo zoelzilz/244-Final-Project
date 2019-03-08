@@ -2,17 +2,15 @@
 # This is the user-interface definition
 #
 ''
-shinyUI(navbarPage("Kelpinator (for now)",
+shinyUI(navbarPage("Kelpinator",
                    
                    ## This panel needs a clickable map input and a barchart output
-                   tabPanel("Monthly Kelp Biomass Loss by Area",
+                   tabPanel("California Kelp Biomass Explorer",
                             
                             # plot the map
                             leafletOutput("harvestbedmap", height = 1000),
-                            div(class="outer",
-                                tags$head(
-                                  includeCSS("./css/styles.css"))),
-                            # add the overlay panel
+                           
+                            # add the header/info panel
                             absolutePanel(id = "description",
                                           class = "panel panel-default",
                                           fixed = T,
@@ -25,11 +23,23 @@ shinyUI(navbarPage("Kelpinator (for now)",
                                           height = "auto",
                                           # set content of panel
                                           h1("Kelp Harvest Bed Explorer"),
-                                          p("This map shows kelp harvest beds in Southern California.")
-                                          )
-                            #mainPanel(plotOutput("barchart", height = 500))),
+                                          p("This map shows kelp harvest beds in Southern California. Click__ to interactively view how kelp biomass is lost due to wave activity throughout the year. Click ___ to visualize kelp biomass in each historical kelp bed.")
                             ),
-             
+                            
+                            #panel with the plot
+                            absolutePanel(id = "plot",
+                                          class = "panel panel-default",
+                                          fixed = T,
+                                          draggable = T,
+                                          top = 350,
+                                          left = "auto",
+                                          right = 20,
+                                          bottom = "auto",
+                                          width = "25%",
+                                          height = "auto",
+                                          plotOutput("plot", height = 500))
+                   ),
+                   
                    ## This panel needs a radiobutton menu widget input and a heatmap output
                    tabPanel("Kelp Biomass Loss per Month",
                             
@@ -64,10 +74,9 @@ shinyUI(navbarPage("Kelpinator (for now)",
                                      
                                      # output tab2
                                      mainPanel(uiOutput("heatmap"))
-                   ),
-                   
-                   ## This panel needs three separate dropdowns whose responses interact 
-                   tabPanel("Economic Consequence of Kelp Loss")
-)))
-
+                            ),
+                            
+                            ## This panel needs three separate dropdowns whose responses interact 
+                            tabPanel("Economic Consequence of Kelp Loss")
+                   )))
 

@@ -4,21 +4,6 @@ library(ggplot2)
 library(sf)
 library(tidyverse)
 
-# our shapefile data
-annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
-jan_swh <- read_sf ("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
-feb_swh <- read_sf ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
-mar_swh <- read_sf ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
-apr_swh <- read_sf ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
-may_swh <- read_sf ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
-jun_swh <- read_sf ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
-jul_swh <- read_sf ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
-aug_swh <- read_sf ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
-sep_swh <- read_sf ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
-oct_swh <- read_sf ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
-nov_swh <- read_sf ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
-dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
-
 
 # not using this data ##########################################################
 
@@ -47,19 +32,29 @@ ogr_annual_intersect2@data <- ogr_annual_intersect2@data %>%
 ogr_annual_intersect2
 
 
+
 ui <- fluidPage(column(7, leafletOutput("harvestbedmap", height = "1000")),
                 column(5, plotOutput("plot", height = "600px"))
 )
 
-################
+############################################################################
 # adding some fluff (should go in another script within R file)
 
 #creating bins for adding binned color to maps # not even remotely necessary #
 
-bins <- c(0, 10, 20, 50, Inf) # based on the random variable I added
+bins <- seq(1,3, 0.05) # based on sig wave height, need smaller bins
+
 
 # defining a color palette, again, unnecessary 
-pal <- colorBin("YlOrRd", domain = ogr_annual_intersect2@data$random_variable, bins = bins)
+pal <- colorBin("YlOrRd", domain = ogr_annual_intersect2@data$ssh, bins = bins)
+
+# setting up labels
+labels <- sprintf(
+  "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
+  ogr_annual_intersect2@data$KelpBed, ogr_annual_intersect2@data$ssh
+) %>% lapply(htmltools::HTML)
+
+###########################################################################
 
 server <- function(input, output) {
   
@@ -67,7 +62,7 @@ server <- function(input, output) {
   output$harvestbedmap <- renderLeaflet({
     leaflet(ogr_annual_intersect2) %>% 
       addTiles() %>% 
-      addPolygons(fillColor = ~pal(random_variable),
+      addPolygons(data =, fillColor = ~pal(ssh),
                   weight = 2,
                   opacity = 1,
                   color = "white",
@@ -78,24 +73,30 @@ server <- function(input, output) {
                     color = "#666",
                     dashArray = "",
                     fillOpacity = 0.7,
-                    bringToFront = TRUE)
+                    bringToFront = TRUE),
+                  layerId = ~unique(ssh),
+                  label = labels,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")
         
       )
       #addCircleMarkers(data = harvest_beds, ~unique(lon), ~unique(lat), layerId = ~unique(KelpBed), popup = ~unique(KelpBed)) 
   })
   
   # generate data in reactive
-  #ggplot_data <- reactive({
-   # bed <- input$harvestbedmap_polygon_click$id
-    #harvest_beds[harvest_beds$KelpBed %in% bed,]
-  #})
+  ggplot_data <- reactive({
+    #print(input$harvestbedmap_shape_click)
+    sigwave <- input$harvestbedmap_shape_click$id
+    ogr_annual_intersect2@data[ogr_annual_intersect2@data$ssh %in% sigwave,]
+  })
+
   
-  #what we need is for this reactive to pull from another dataframe
-  
-  #output$plot <- renderPlot({
-   # ggplot(data = ggplot_data(), aes(random_variable)) +
-    #  geom_bar()
-  #}) 
+  output$plot <- renderPlot({
+    ggplot(data = ggplot_data(), aes(ssh)) +
+      geom_bar()
+  }) 
 }
 
 shinyApp(ui, server)
