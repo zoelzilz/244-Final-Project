@@ -52,7 +52,7 @@ pal <- colorBin("YlOrRd", domain = kelp_intersected@data$kelp_loss, bins = bins)
 # setting up labels
 labels <- sprintf(
   "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
-  kelp_intersected@data$KelpBed, kelp_intersected@data$polygonID
+  kelp_intersected@data$KelpBed, kelp_intersected@data$kelp_loss
 ) %>% lapply(htmltools::HTML)
 
 ###########################################################################
@@ -75,7 +75,7 @@ server <- function(input, output) {
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = TRUE),
-                  layerId = ~polygonID, # had to remove ~unique(polygonID) because it FUCKED EVERYTHING UP
+                  layerId = ~unique(kelp_loss),
                   label = labels,
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -88,33 +88,16 @@ server <- function(input, output) {
   
   # generate data in reactive
   ggplot_data <- reactive({
-    print(input$harvestbedmap_shape_click)
+    #print(input$harvestbedmap_shape_click)
     kelp <- input$harvestbedmap_shape_click$id
-    print(kelp)
-    
-    data <- kelp_intersected@data[kelp_intersected@data$polygonID %in% kelp,]
-    print(data)
-    data
-    
+    kelp_intersected@data[kelp_intersected@data$kelp_loss %in% kelp,]
   })
 
   
   output$plot <- renderPlot({
-    ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
-      geom_bar(stat = "identity")
+    ggplot(data = ggplot_data(), aes(kelp_loss)) +
+      geom_bar()
   }) 
 }
 
 shinyApp(ui, server)
-
-# it's not working because layerID = ~unique(kelp_bed) is TOO UNIQUE. it will not return
-# FIXED
-
-# it's still returning only one bar (annual) and I'm not sure why 
-# FIXED!! ~unique(polygonID) was also too unique, seems like being too unique is the theme here
-
-# also the data frame it prints consistently has the wrong kelp bed 
-# fixed by above
-
-# minor problem: some small amount of polygons have disappeared since i fixed the last thing
-# major problem: it's super ugly, and rae wants to make it a line graph

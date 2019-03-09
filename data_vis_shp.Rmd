@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load packages and data}
 
-library(purrr)
+library(sf)
 library(sp)
 library(tmap)
 library(leaflet)
@@ -29,12 +29,10 @@ library(rgdal)
 install.packages("devtools")
 library(devtools)
 install_github("gsk3/taRifx.geo")
-install_github("r-spatial/sf")
 library(taRifx.geo)
 library(tidyverse)
 library(beepr)
 library(praise)
-library(dplyr)
 
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
@@ -193,23 +191,7 @@ sep_ogr@data <- mutate(sep_ogr@data, month = "September")
 oct_ogr@data <- mutate(oct_ogr@data, month = "October")
 nov_ogr@data <- mutate(nov_ogr@data, month = "November")
 dec_ogr@data <- mutate(dec_ogr@data, month = "December")
-
-annual_ogr@data <- mutate(annual_ogr@data, polygonID = rownames(annual_ogr@data))
-jan_ogr@data <- mutate(jan_ogr@data, polygonID = rownames(jan_ogr@data))
-feb_ogr@data <- mutate(feb_ogr@data, polygonID = rownames(feb_ogr@data))
-mar_ogr@data <- mutate(mar_ogr@data, polygonID = rownames(mar_ogr@data))
-apr_ogr@data <- mutate(apr_ogr@data, polygonID = rownames(apr_ogr@data))
-may_ogr@data <- mutate(may_ogr@data, polygonID = rownames(may_ogr@data))
-jun_ogr@data <- mutate(jun_ogr@data, polygonID = rownames(jun_ogr@data))
-jul_ogr@data <- mutate(jul_ogr@data, polygonID = rownames(jul_ogr@data))
-aug_ogr@data <- mutate(aug_ogr@data, polygonID = rownames(aug_ogr@data))
-sep_ogr@data <- mutate(sep_ogr@data, polygonID = rownames(sep_ogr@data))
-oct_ogr@data <- mutate(oct_ogr@data, polygonID = rownames(oct_ogr@data))
-nov_ogr@data <- mutate(nov_ogr@data, polygonID = rownames(nov_ogr@data))
-dec_ogr@data <- mutate(dec_ogr@data, polygonID = rownames(dec_ogr@data))
 beep(2)
-
-# should add a unique numeric ID to each polygon, but thats consistent across all months (1 - 63623)
 
 ##reset all names to ssh so they all match
 names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
@@ -230,16 +212,19 @@ names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
 annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
 annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
 annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
 annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
 annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
 beep(2)
 annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
 annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
 annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
 beep(2)
 annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
 annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
 beep(5)
 

@@ -9,45 +9,50 @@ library(shiny)
 library(ggplot2)
 library(sf)
 library(tidyverse)
+library(rgdal)
 
 ###################################################################################################
 #load the data
-# the data we need is a SpatialPolygonsDataframe, created in another script (currently in the data_vis_shp.Rmd)
+# the data we need is a SpatialPolygonsDataframe, created in another script 
+# (currently in the data_vis_shp.Rmd) and saved as a new SPD
 
 # it is called:
-ogr_annual_intersect2
-
-# can easily view and access dataframe within using 
-ogr_annual_intersect2@data <- ogr_annual_intersect2@data %>% 
-  mutate(random_variable = sample(1:50, 1893, replace = TRUE))
+kelp_intersected <- readOGR(dsn = ".", layer = "kelp_intersected")
 
 # ssh is our significant wave height
+# kelp_loss is our main response variable
 
-
-ogr_annual_intersect2
-#
+############################################################################
+# adding some fluff (should go in another script within R file, but not sure what to name that script or how to call)
 
 #creating bins for adding binned color to maps # not even remotely necessary #
 
-bins <- seq(1,3, 0.05) # based on sig wave height, need smaller bins
+#max(kelp_intersected@data$kelp_loss)
+#68.37364
+
+#min(kelp_intersected@data$kelp_loss)
+#8.423632
+
+bins <- seq(8,68, 1) # based on kelp_loss, need to seq from min to max
 
 
-# defining a color palette, again, unnecessary 
-pal <- colorBin("YlOrRd", domain = ogr_annual_intersect2@data$ssh, bins = bins)
+# defining a color palette, which needs to have at least 68 colors
+pal <- colorBin("YlOrRd", domain = kelp_intersected@data$kelp_loss, bins = bins)
 
 # setting up labels
 labels <- sprintf(
   "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
-  ogr_annual_intersect2@data$KelpBed, ogr_annual_intersect2@data$ssh
+  kelp_intersected@data$KelpBed, kelp_intersected@data$polygonID #eventually change back to ssh
 ) %>% lapply(htmltools::HTML)
+
+###########################################################################
 
 ###################################################################################################
 
 server <- function(input,output, session){
   
-  # maps output for second tab
-  #reactive_month <- eventReactive(input$radioButtons,
-                                 # {})
+  # maps output for SECOND tab
+ 
   output$heatmap <- renderUI({
     if(input$Month == "Annual"){            
         img(height = 700, width = 700, src = "annual.png")
@@ -58,7 +63,36 @@ server <- function(input,output, session){
     else if(input$Month == "February"){
       img(height = 700, width = 700, src = "feb.png")
     }
-    
+    else if(input$Month == "March"){
+      img(height = 700, width = 700, src = "march.png")
+    }
+    else if(input$Month == "April"){
+      img(height = 700, width = 700, src = "april.png")
+    }
+    else if(input$Month == "May"){
+      img(height = 700, width = 700, src = "May.png")
+    }
+    else if(input$Month == "June"){
+      img(height = 700, width = 700, src = "june.png")
+    }
+    else if(input$Month == "July"){
+      img(height = 700, width = 700, src = "july.png")
+    }
+    else if(input$Month == "August"){
+      img(height = 700, width = 700, src = "August.png")
+    }
+    else if(input$Month == "September"){
+      img(height = 700, width = 700, src = "September.png")
+    }
+    else if(input$Month == "October"){
+      img(height = 700, width = 700, src = "October.png")
+    }
+    else if(input$Month == "November"){
+      img(height = 700, width = 700, src = "November.png")
+    }
+    else if(input$Month == "December"){
+      img(height = 700, width = 700, src = "December.png")
+    }
     
   })
   
@@ -66,10 +100,10 @@ server <- function(input,output, session){
   # create the leaflet map 
   
   output$harvestbedmap <- renderLeaflet({
-    leaflet(ogr_annual_intersect2) %>% 
+    leaflet(kelp_intersected) %>% 
       addTiles() %>% 
       setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) %>%  #pick a prettier basemap
-      addPolygons(data =, fillColor = ~pal(ssh),
+      addPolygons(data =, fillColor = ~pal(kelp_loss),
                   weight = 2,
                   opacity = 1,
                   color = "white",
@@ -81,7 +115,7 @@ server <- function(input,output, session){
                     dashArray = "",
                     fillOpacity = 0.7,
                     bringToFront = TRUE),
-                  layerId = ~unique(ssh),
+                  layerId = ~polygonID,
                   label = labels,
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -94,15 +128,21 @@ server <- function(input,output, session){
   
   # generate data in reactive
   ggplot_data <- reactive({
-    #print(input$harvestbedmap_shape_click)
-    sigwave <- input$harvestbedmap_shape_click$id
-    ogr_annual_intersect2@data[ogr_annual_intersect2@data$ssh %in% sigwave,]
+    print(input$harvestbedmap_shape_click)
+    kelp <- input$harvestbedmap_shape_click$id
+    print(kelp)
+    
+    data <- kelp_intersected@data[kelp_intersected@data$polygonID %in% kelp,]
+    print(data)
+    data
+    
   })
   
   
   output$plot <- renderPlot({
-    ggplot(data = ggplot_data(), aes(ssh)) +
-      geom_bar()
+    ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
+      geom_bar(stat = "identity")
+    
   })
 }
 

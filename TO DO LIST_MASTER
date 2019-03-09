@@ -1,0 +1,106 @@
+3/9/2019
+
+--------------------------------------------------------------------------------------------------------------
+THINGS THAT ARE DONE:
+- all raster map pngs are created and in /www folder
+
+--------------------------------------------------------------------------------------------------------------
+THINGS THAT COULD BE DONE
+- change legend size, title size (or existence?) on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files. **not too labor intensive but also not a priority**
+
+- figure out how to map the rasters within our existing leaflet -- would be VERY CLEAN and awesome looking but **probably labor intensive and not worth it** plus would take away from one tab
+
+- switch to using plotly (interactive) instead of ggplot
+
+--------------------------------------------------------------------------------------------------------------
+THINGS THAT NEED TO BE DONE
+
+- REORDER KELP_INTERSECTED@DATA$MONTHS FACTOR SO ITS IN A NORMAL MFCKING ORDER
+
+- change bar graph to line graph/frequency polygon? (this is proving to be more difficult than i originally thought)
+
+- figure out and execute: adding historic kelp bed layer onto map
+- figure out how to toggle between layers
+- wrangle kelp biomass data and add clickable variable sized dots layer to leaflet basemap
+
+- finalize look and feel of app // make it pretty 
+- write and format intro tab
+
+-------------------------------------------------------------------------------------------------------------
+OTHER PROGRESS NOTES
+
+- everything currently made is combined together as of 10:45 am 3/9
+- app is currently crashing because it cannot load data ONLY IN THE FULL APP - mini (testing_clickable_map) is working fine
+- for some reason adding layerID = ~polygonID instead of ~unique(polygonID) deletes several polygons
+- months are in the wrong order
+-coercing ggplot to geom_line is not working, consider switching to plotly
+
+
+
+
+
+
+
+
+
+
+
+** ignore below **
+____________________________________________________________________________________________________________
+TAB 2 TASKS
+
+3. Copy and paste the annual map code for all 12 months and pull in the shapefiles for those months -- will do once the equation is input correctly
+4. Save those .png files with tmap_save into the www/ folder in the app directory folder -- same as 3
+4b. Zoe can do this if you don't want to... but ... update server.R with filenames for pngs i.e.:
+else if(input$Month == "January"){
+      img(height = 500, width = 300, src = "jan.png")
+      
+      (you'll see this in the server code, it's pretty obvious)
+      
+AND THEN TAB 2 IS DONE
+
+ideas:
+
+map has three layers
+1) clickable polygons with loss by month output
+2) historical kelp beds
+3) actual kelp biomass
+
+to do tomorrow:
+
+(1)rbind everything together in the data vis 
+- run top chunk with data
+- skip raster 1 and 2
+- run third chunk with mutations and name changing and rbinding
+-separate chunks, run only the last intersect
+
+(1b) SAVE into new spatial polygons dataset using writeOGR
+
+(2) finish making all the heatmaps now that the extents are correct
+- save them to /www folder
+
+(3) plug new HUGE rbinded spatial polygon dataset into app and see if it runs without burning to the ground
+- just replace ogr_annual_intersect2 and MAKE SURE to replace all instances of ssh with "kelploss" or whatever we name it
+
+(4) get Tom's kelp data and play with it
+
+(5) add layer with kelp beds (from separate dataset that we already have somewehre)
+
+(6) make it all pretty
+
+_____________________________________________________________________________________________________________
+TO DO LIST FOR RAE:
+
+tomorrow:
+1. Fix raster crop in allthemaps.R (not in datavis markdown) to better represent SoCal --DONE
+2. Incorporate kelp loss equation (again, in allthemaps.R) --DONE
+
+---- zoe will do 3-5 ----
+      
+5. Figure out if we need to use qgis to extract the sig wave height data to make the bar graphs on tab 1 (kelp loss by month for a certain *clickable* harvest bed) OR if we can just use the shapefile to make these graphs (idk how but we can figure it out) -- I believe we can convert the shapefile to a dataframe and then plot normally. adding documentation now to googledoc and researching
+
+6. Same re: the final tab
+7. Get hands on the equation to calculate economic losses -- potentially change this to widget of info on values for each kelp product 
+8. Get shapefile for harvest beds and mess with overlaying it over // binding it to our og shapefile -- shapefile added
+
+      

@@ -1,0 +1,364 @@
+---
+title: "data_vis_shp"
+author: "Rae Fuhrman"
+date: "2/20/2019"
+output: html_document
+---
+
+add to to do: put all shapefiles together and create a new column that says month
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages and data}
+
+library(purrr)
+library(sp)
+library(tmap)
+library(leaflet)
+library(ggrepel)
+library(ggspatial)
+library(RColorBrewer)
+library(fasterize)
+library(raster)
+library(colorspace)
+library(maptools)
+library(leaflet.minicharts)
+library(rgdal)
+install.packages("devtools")
+library(devtools)
+install_github("gsk3/taRifx.geo")
+install_github("r-spatial/sf")
+library(taRifx.geo)
+library(tidyverse)
+library(beepr)
+library(praise)
+library(dplyr)
+
+
+annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_swh <- read_sf ("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_swh <- read_sf ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+mar_swh <- read_sf ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_swh <- read_sf ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_swh <- read_sf ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_swh <- read_sf ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_swh <- read_sf ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_swh <- read_sf ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_swh <- read_sf ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_swh <- read_sf ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_swh <- read_sf ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
+dec_swh <- read_sf ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+
+
+annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+mar_ogr <- readOGR ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_ogr <- readOGR ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_ogr <- readOGR ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_ogr <- readOGR ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_ogr <- readOGR ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_ogr <- readOGR ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_ogr <- readOGR ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
+dec_ogr <- readOGR ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+beep(2)
+
+harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>% 
+  st_transform(crs = 4326)
+
+harvest_beds_ogr <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+beep(2)
+
+```
+Simple feature collection with 63623 features and 1 field
+geometry type:  POLYGON
+dimension:      XY
+bbox:           xmin: -179.998 ymin: 16.96665 xmax: 179.998 ymax: 63.03335
+epsg (SRID):    4326
+proj4string:    +proj=longlat +datum=WGS84 +no_defs
+
+```{r plot and visualize}
+
+plot(annual_swh)
+range(annual_swh$ann_ssh) #0.09 3.12, must be in meters
+
+## Set up a raster "template" for a 1/12 degree grid
+?extent
+ext <- extent(-179.998, 179.998, 16.96665, 63.03335)
+gridsize <- 0.083
+r <- raster(ext, res=gridsize)
+
+## Rasterize the shapefile
+#rr <- rasterize(annual_swh, r, field = "ann_ssh") #this took like 5 minutes
+#rr
+
+## Plot raster
+#plot(rr, box = FALSE) #scale is 0-60,000... may have multiplied everything by 10,000 i.e. SWH of 6 = 60,000
+#axes = FALSE
+
+##make and plot raster with fasterize -- MUCH FASTER
+fr <- fasterize(annual_swh, r, field = "ann_ssh") #field is the value for each of the polygons rasterized; default fun = "last" though I'm not sure exactly which one we want
+plot(fr) #different results than rasterize. different scale entirely.
+
+
+##make cropped vector for southern california to rasterize; seems easier to crop the vector first rather than cropping the raster after
+crop_annual <- st_crop(annual_swh, c(xmin=-123, xmax=-118, ymin=32, ymax=38)) #look up exact bounding box from arpa-e
+
+ext1 <- extent(-123, -118, 32, 38)
+gridsize1 <- 0.083
+r1 <- raster(ext1, res=gridsize1)
+
+crop_socal_ras <- fasterize(annual_swh, r1, field = "ann_ssh") #used non-cropped vector with new cropped raster
+crop_socal_ras
+#class       : RasterLayer 
+#dimensions  : 72, 60, 4320  (nrow, ncol, ncell)
+#resolution  : 0.083, 0.083  (x, y)
+#extent      : -123, -118.02, 32.024, 38  (xmin, xmax, ymin, ymax)
+plot(crop_socal_ras)
+
+
+crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this method appears identical
+crop_socal_ras2
+#class       : RasterLayer 
+#dimensions  : 72, 60, 4320  (nrow, ncol, ncell)
+#resolution  : 0.083, 0.083  (x, y)
+#extent      : -123, -118.02, 32.024, 38  (xmin, xmax, ymin, ymax)
+plot(crop_socal_ras2)
+
+```
+
+
+```{r visualize with tmap}
+
+crop_socal_ras2@crs
+
+pal <- choose_palette()
+
+##map with the cropped vector
+annual_map <- tm_shape(crop_annual) +
+  tm_polygons("ann_ssh", title = "Significant Wave Heights in southern California",
+              palette = "RdYlBu") +
+  tm_layout(bg.color = "navyblue", 
+            legend.position = c("right","top"),
+            legend.text.color = "white", 
+            legend.text.size = 0.5) 
+  #tm_shape(islands) +
+  #tm_fill("darkgreen")
+annual_map
+
+##map with the cropped raster -- USE FOR HEATMAP
+annual_map2 <- tm_shape(crop_socal_ras2) +
+  tm_raster("layer", title = "Significant Wave Heights in southern California") +
+  tm_layout(bg.color = "navyblue", 
+            legend.position = c("right","top"),
+            legend.text.color = "white", 
+            legend.text.size = 0.5)
+annual_map2
+
+  #tm_shape(islands) +
+  #tm_fill("ann_ssh")
+annual_map2
+#output is smoother without the individual polygons
+?tm_raster
+
+#tmap_save(sst_map, "sst.png", height=5)
+
+```
+
+
+```{r}
+
+##sneaky way using taRifx.geo package
+#install.packages("devtools")
+#library(devtools)
+#install_github("gsk3/taRifx.geo")
+
+############ start
+
+annual_ogr@data <- mutate(annual_ogr@data, month = "Annual")
+jan_ogr@data <- mutate(jan_ogr@data, month = "January")
+feb_ogr@data <- mutate(feb_ogr@data, month = "February")
+mar_ogr@data <- mutate(mar_ogr@data, month = "March")
+apr_ogr@data <- mutate(apr_ogr@data, month = "April")
+may_ogr@data <- mutate(may_ogr@data, month = "May")
+jun_ogr@data <- mutate(jun_ogr@data, month = "June")
+jul_ogr@data <- mutate(jul_ogr@data, month = "July")
+aug_ogr@data <- mutate(aug_ogr@data, month = "August")
+sep_ogr@data <- mutate(sep_ogr@data, month = "September")
+oct_ogr@data <- mutate(oct_ogr@data, month = "October")
+nov_ogr@data <- mutate(nov_ogr@data, month = "November")
+dec_ogr@data <- mutate(dec_ogr@data, month = "December")
+
+annual_ogr@data <- mutate(annual_ogr@data, polygonID = rownames(annual_ogr@data))
+jan_ogr@data <- mutate(jan_ogr@data, polygonID = rownames(jan_ogr@data))
+feb_ogr@data <- mutate(feb_ogr@data, polygonID = rownames(feb_ogr@data))
+mar_ogr@data <- mutate(mar_ogr@data, polygonID = rownames(mar_ogr@data))
+apr_ogr@data <- mutate(apr_ogr@data, polygonID = rownames(apr_ogr@data))
+may_ogr@data <- mutate(may_ogr@data, polygonID = rownames(may_ogr@data))
+jun_ogr@data <- mutate(jun_ogr@data, polygonID = rownames(jun_ogr@data))
+jul_ogr@data <- mutate(jul_ogr@data, polygonID = rownames(jul_ogr@data))
+aug_ogr@data <- mutate(aug_ogr@data, polygonID = rownames(aug_ogr@data))
+sep_ogr@data <- mutate(sep_ogr@data, polygonID = rownames(sep_ogr@data))
+oct_ogr@data <- mutate(oct_ogr@data, polygonID = rownames(oct_ogr@data))
+nov_ogr@data <- mutate(nov_ogr@data, polygonID = rownames(nov_ogr@data))
+dec_ogr@data <- mutate(dec_ogr@data, polygonID = rownames(dec_ogr@data))
+beep(2)
+
+# should add a unique numeric ID to each polygon, but thats consistent across all months (1 - 63623)
+
+##reset all names to ssh so they all match
+names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
+names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
+names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
+names(mar_ogr)[names(mar_ogr)=="mar_ssh"] <- "ssh"
+names(apr_ogr)[names(apr_ogr)=="apr_ssh"] <- "ssh"
+names(may_ogr)[names(may_ogr)=="may_ssh"] <- "ssh"
+names(jun_ogr)[names(jun_ogr)=="jun_ssh"] <- "ssh"
+names(jul_ogr)[names(jul_ogr)=="jul_ssh"] <- "ssh"
+names(aug_ogr)[names(aug_ogr)=="aug_ssh"] <- "ssh"
+names(sep_ogr)[names(sep_ogr)=="sep_ssh"] <- "ssh"
+names(oct_ogr)[names(oct_ogr)=="oct_ssh"] <- "ssh"
+names(nov_ogr)[names(nov_ogr)=="nov_ssh"] <- "ssh"
+names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
+
+##now bind them all once at a time 
+annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
+annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
+annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
+annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
+annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
+annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
+annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
+beep(5)
+
+
+```
+
+
+```{r}
+
+#ogr_annual_intersect <- annJan %>% 
+  #intersect(harvest_beds)#non identical CRS again even though they do
+
+#ogr_annual_intersect <- annJan %>% #works with this one
+  #raster::intersect(harvest_beds_ogr) #intersect is in raster package
+#plot(ogr_annual_intersect) #it worked! I think
+
+ogr_annual_intersect2 <- annDec %>% 
+  raster::intersect(harvest_beds_ogr)
+beep(5)
+
+#mutate does not pipe in/work concurrently with intersect
+
+ogr_annual_intersect2@data<- ogr_annual_intersect2@data %>% 
+  mutate(kelp_loss = (150.422 * ssh) / (3.54 + ssh))
+beep(5)
+
+head(ogr_annual_intersect2@data)
+
+# i'm going to  make this into a spatial polygons dataset now called kelp_intersected
+# and then hopefully we will never need to run this code ever again
+
+writeOGR(ogr_annual_intersect2, dsn = ".", layer = "kelp_intersected", driver = "ESRI Shapefile")
+beep(2)
+# object, dsn, layer (is the filename), driver (needs to be ESRI Shapefile (capital S) always I think), [there are more options but they're complicated and i'm scared]
+# went super fast
+
+# this is disconcerting
+
+#Warning 1: Value 392241961.796999991 of field Shape_Area of feature 1 not successfully written. Possibly due to too larger number with respect to field width
+#......
+#Warning 1: Value 238887172.344999999 of field Shape_Area of feature 1349 not successfully written. Possibly due to too larger number with respect to field width
+#Warning 1: Value 238887172.344999999 of field Shape_Area of feature 1350 not successfully written. Possibly due to too larger number with respect to field width
+#Warning 1: Value 167564295.451000005 of field Shape_Area of feature 1351 not successfully written. Possibly due to too larger number with respect to field width
+#More than 1000 errors or warnings have been reported. No more will be reported from now.
+
+
+```
+
+
+
+add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
+```{r}
+
+beds_swh <- annual_swh %>% 
+  st_intersection(harvest_beds)
+plot(beds_swh) 
+# so this worked but we still probably want to take a mean of the swh in each bed and make new columns for that so that we have one clickable area (each harvest bed) that averages the swh polygons that intersect.  
+
+ggplot(beds_swh)+
+  geom_sf(data = ca_counties, fill = "gray90", color = "gray80", size = 0.2)+
+  geom_sf(aes(fill = Region), color = "NA")+
+  scale_fill_manual(values = c("darkolivegreen2", "darkolivegreen", "gold2"))+
+  coord_sf(xlim = c(-121, -119), ylim= c(33.5, 35.5))+ #trial and error, West is negative, cropped to area
+
+beds_swh2 <- st_intersection(annual_swh, harvest_beds)#clip swh polygons to bounds of harvest_beds polygons
+#both codes do the same thing
+
+```
+
+
+
+
+Some plotting stuff that didn't work but I'm a hoarder
+```{r}
+#CA<-readOGR("244-extra", layer="california_county_shape_file") # read the CA state boundary shapefile
+
+#gplot(crop_socal_ras2) +  # will eventually change this to plot(kelploss_ann) but keeping it this way to test)
+ # geom_raster(aes(fill=factor(value),alpha=0.8)) +
+  #scale_fill_viridis_d(na.value = "white")+
+  #geom_polygon(data=CA, aes(x=lon, y = lat),
+   #            fill="gray90",color="grey50", size=1)+
+  #coord_equal()
+
+### not working included below ##
+ann_Jan <- rbind(annual_swh, jan_swh, fix.duplicated.IDs = TRUE)#Error: arguments have different crs but they are both in 4326
+ann_Jan <- rbind(annual_ogr, jan_ogr, makeUniqueIDs = TRUE) #error, only accepts SPDF but it is an SPDF
+ann_Jan <- rbind(annual_swh, jan_swh, makeUniqueIDs = TRUE)#Error: arguments have different crs but they are both in 4326
+
+##https://gis.stackexchange.com/questions/32732/proper-way-to-rbind-spatialpolygonsdataframes-with-identical-polygon-ids
+getSlots(class(jan_ogr))
+class(slot(jan_ogr, "polygons")[[1]])
+getSlots(class(slot(jan_ogr, "polygons")[[1]])) #ID is already a character, polygons are a list
+#So to get all ID's
+sapply(slot(jan_ogr, "polygons"), function(x) slot(x, "ID"))
+#or
+rownames(as(jan_ogr, "data.frame"))
+makeUniform<-function(SPDF){
+  pref<-substitute(SPDF)  #just putting the file name in front.
+  newSPDF<-spChFIDs(SPDF,as.character(paste(pref,rownames(as(SPDF,"data.frame")),sep="_")))
+  return(newSPDF)
+}
+#newIDs<-lapply(lst,function(x) makeUniform(x))
+
+###################### beginning of code used to intersect all of our shapefiles? ###########
+
+class(jan_swh)
+class(jan_ogr) #reads in as "spatialpolygonsdataframe"
+nrow(annual_swh)#all have 63623 rows
+row.names(annual_swh)
+row.names(jan_swh) #currently row names are the same, need to be different (unique IDs)
+
+n <- length(slot(jan_ogr, "polygons"))####neither column is slot name in sf nor polygons with jan_swh, works with ogr read in style because spatialpolygondataframe. outputs 63623 which is correct.
+u_jan_swh <- spChFIDs(jan_ogr, as.character(n))#replaces ID's, in this case with length of original df --- Error in spChFIDs(SP, x) : lengths differ
+row.names(jan_ogr)
+row.names(annual_ogr)#they do match
+
+?spRbind
+?spChFIDs
+```
+
+
+
