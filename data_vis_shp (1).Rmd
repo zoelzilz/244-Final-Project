@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load packages and data}
 
-library(purrr)
+#library(purrr)
 library(sp)
 library(tmap)
 library(leaflet)
@@ -21,20 +21,20 @@ library(ggrepel)
 library(ggspatial)
 library(RColorBrewer)
 library(fasterize)
-library(raster)
+#library(raster)
 library(colorspace)
 library(maptools)
 library(leaflet.minicharts)
 library(rgdal)
-install.packages("devtools")
-library(devtools)
-install_github("gsk3/taRifx.geo")
-install_github("r-spatial/sf")
+#install.packages("devtools")
+#library(devtools)
+#install_github("gsk3/taRifx.geo")
+#install_github("r-spatial/sf")
 library(taRifx.geo)
 library(tidyverse)
 library(beepr)
 library(praise)
-library(dplyr)
+
 
 
 annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon")
@@ -73,6 +73,8 @@ harvest_beds <- read_sf("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") %>%
 harvest_beds_ogr <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
 harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 beep(2)
+
+kelp_biomass <- read_csv
 
 ```
 Simple feature collection with 63623 features and 1 field
@@ -226,7 +228,7 @@ names(oct_ogr)[names(oct_ogr)=="oct_ssh"] <- "ssh"
 names(nov_ogr)[names(nov_ogr)=="nov_ssh"] <- "ssh"
 names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
 
-##now bind them all once at a time 
+##now bind them all one at a time 
 annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
 annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
 annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
@@ -289,8 +291,15 @@ beep(2)
 ```
 
 
+```{r}
 
-add historic kelp beds layer and figure out how to overlay them (maybe?) such that the attributes remain -- want to find the intersections of each swh polygon with kelp bed polygon and only include this data. st_intersection?
+
+
+
+```
+
+
+
 ```{r}
 
 beds_swh <- annual_swh %>% 
