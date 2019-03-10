@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load packages and data}
 
 #library(purrr)
+library(sf)
 library(sp)
 library(tmap)
 library(leaflet)
@@ -74,7 +75,7 @@ harvest_beds_ogr <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin")
 harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 beep(2)
 
-kelp_biomass <- read_csv
+kelp_biomass <- read_csv("kelp_data_Bell.csv")
 
 ```
 Simple feature collection with 63623 features and 1 field
@@ -293,8 +294,12 @@ beep(2)
 
 ```{r}
 
+biomass_sf <- st_as_sf(kelp_biomass, coords = c("Lon","Lat"), crs=4326)
 
-
+ggplot(biomass_sf)+
+  geom_sf(data = harvest_beds, fill = "gray90", color = "gray80", size = 0.2)+
+  geom_sf(aes(fill = Mean_Biomass), color = "NA")
+  #scale_fill_manual(values = c("darkolivegreen2", "darkolivegreen", "gold2"))
 
 ```
 
