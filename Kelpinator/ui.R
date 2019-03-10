@@ -2,7 +2,9 @@
 # This is the user-interface definition
 #
 ''
-shinyUI(navbarPage("Kelpinator",
+shinyUI( navbarPage("Kelpinator",
+                    tabPanel("App Overview",
+                             "there will be some text here and some pictures and it will be cute"),
                    
                    ## This panel needs a clickable map input and a barchart output
                    tabPanel("California Kelp Biomass Explorer",
@@ -40,15 +42,15 @@ shinyUI(navbarPage("Kelpinator",
                                           plotOutput("plot", height = 500))
                    ),
                    
-                   ## This panel needs a radiobutton menu widget input and a heatmap output
+                   ## This panel has a radiobutton menu widget input and a heatmap output
                    tabPanel("Kelp Biomass Loss per Month",
                             
-                            # informative text to accompany widget
+                            # this tab needs to be so much nicer looking
                             
                             fluidRow(column(12,
                                             h1("Kelp biomass loss changes seasonally"),
-                                            p("."),
-                                            br(),
+                                            #p("."),
+                                            #br(),
                                             h4("Instructions"),
                                             p("Use the radio buttons on the left to chose a month."))),
                             hr(),

@@ -7,20 +7,37 @@
 library(leaflet)
 library(shiny)
 library(ggplot2)
-library(sf)
+#library(sf)
 library(tidyverse)
 library(rgdal)
+library(RColorBrewer)
 
 ###################################################################################################
 #load the data
-# the data we need is a SpatialPolygonsDataframe, created in another script 
+###################################################################################################
+
+# the map data we need is a SpatialPolygonsDataframe, created in another script 
 # (currently in the data_vis_shp.Rmd) and saved as a new SPD
 
 # it is called:
-kelp_intersected <- readOGR(dsn = ".", layer = "kelp_intersected")
+kelp_intersected <- readOGR(".", layer = "kelp_intersected")#%>% 
+#fct_relevel(kelp_intersected@data$month, "Annual", "January", "February", "March", "April", "May", "June", "July", "August", "September","October", "November","December" )
 
+#above did not work to relevel, trying instead:
+kelp_intersected@data$month <- factor(kelp_intersected@data$month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+
+#worked
 # ssh is our significant wave height
 # kelp_loss is our main response variable
+
+# also loading Tom's kelp data
+
+tomkelp<- read_csv ("kelp_data_Bell.csv")
+
+# we also need the historic kelp bed data, separately i think
+
+harvest_beds <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds <- spTransform(harvest_beds, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 ############################################################################
 # adding some fluff (should go in another script within R file, but not sure what to name that script or how to call)
@@ -33,35 +50,139 @@ kelp_intersected <- readOGR(dsn = ".", layer = "kelp_intersected")
 #min(kelp_intersected@data$kelp_loss)
 #8.423632
 
-bins <- seq(8,68, 1) # based on kelp_loss, need to seq from min to max
-
-
-# defining a color palette, which needs to have at least 68 colors
-pal <- colorBin("YlOrRd", domain = kelp_intersected@data$kelp_loss, bins = bins)
-
 # setting up labels
 labels <- sprintf(
   "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
-  kelp_intersected@data$KelpBed, kelp_intersected@data$polygonID #eventually change back to ssh
+  kelp_intersected@data$KelpBed, kelp_intersected@data$polygonID #can check everything is calling right polgons by changing to polygonID #
 ) %>% lapply(htmltools::HTML)
+
+labels2 <- sprintf(
+  "<strong>Kelp Bed: %g</strong>",
+  harvest_beds@data$KelpBed) %>% 
+  lapply(htmltools::HTML)
+
+# setting up color palette
+
+#colourCount <- length(unique(kelp_intersected@data$kelp_loss))
+#getPalette <- colorRampPalette(brewer.pal(9, "Spectral"))
+
+bins <- seq(8,68, 10) # based on kelp_loss, need to seq from min to max
+
+
+#defining a color palette, which needs to have at least 68 colors
+pal <- colorBin("Spectral", domain = kelp_intersected@data$kelp_loss, bins = bins)
 
 ###########################################################################
 
 ###################################################################################################
 
 server <- function(input,output, session){
+
   
-  # maps output for SECOND tab
- 
+  # first tab
+  # create the leaflet map 
+  
+  output$harvestbedmap <- renderLeaflet({
+    leaflet(kelp_intersected) %>% 
+      addTiles() %>% 
+      #setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) %>%  #pick a prettier basemap
+      
+      
+      addPolygons(data = , fillColor = ~pal(kelp_loss), #getPalette(colorCount),
+                  group = "Kelp Percent Biomass Loss",
+                  weight = 2,
+                  opacity = 1,
+                  color = "white",
+                  dashArray = "3",
+                  fillOpacity = 0.7,
+                  highlight = highlightOptions(
+                    weight = 5,
+                    color = "#666",
+                    dashArray = "",
+                    fillOpacity = 0.7,
+                    bringToFront = TRUE
+                    ),
+                  layerId = ~polygonID,
+                  label = labels,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")
+                  ) %>% 
+      
+      
+      # add a new layer with kelp bed biomass WORK IN PROGRESS -- right now too many circles
+      addCircleMarkers(data = tomkelp, 
+                       lng = ~Lon, 
+                       lat = ~Lat, 
+                       popup =  "hello!", #~Mean_Biomass, 
+                       group = "Current Kelp Biomass") %>% 
+      
+      # add historic kelp beds
+      addPolygons(data = harvest_beds, fillColor = "green",
+                  group = "Historic Kelp Beds",
+                  weight = 2,
+                  opacity = 1,
+                  color = "green",
+                  dashArray = "3",
+                  fillOpacity = 0.3,
+                  highlight = highlightOptions(
+                    weight = 5,
+                    color = "darkgreen",
+                    dashArray = "",
+                    fillOpacity = 0.3,
+                    bringToFront = FALSE),
+                  label = labels2,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")
+      ) %>% 
+      addLayersControl(baseGroups = c("Kelp Percent Biomass Loss", "Current Kelp Biomass"), 
+                       overlayGroups = c("Historic Kelp Beds"),
+                       options = layersControlOptions(collapsed = FALSE)) %>% 
+      hideGroup("Current Kelp Biomass")
+      #hideGroup("Kelp Percent Biomass Loss")  
+      
+  })
+  
+  # generate data in reactive
+  ggplot_data <- reactive({
+    print(input$harvestbedmap_shape_click)
+    kelp <- input$harvestbedmap_shape_click$id
+    print(kelp)
+    
+    data <- kelp_intersected@data[kelp_intersected@data$polygonID %in% kelp,]
+    print(data)
+    data
+    
+  })
+  output$plot <- renderPlot({
+    ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
+      geom_point(stat = "identity")+
+      geom_line(group = 1)+
+      ylab("Percent Kelp Biomass Loss")+
+      xlab("Month")+
+      theme_minimal()+
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.line = element_line(colour = "black"))
+  })
+  
+  #######################
+  # maps output for tab 2
+  ########################
+  
   output$heatmap <- renderUI({
     if(input$Month == "Annual"){            
-        img(height = 700, width = 700, src = "annual.png")
-      }                                        
+      img(height = 700, width = 700, src = "annual.png")
+    }                                        
     else if(input$Month == "January"){
-      img(height = 700, width = 700, src = "jan.png")
+      img(height = 700, width = 700, src = "january.png")
     }
     else if(input$Month == "February"){
-      img(height = 700, width = 700, src = "feb.png")
+      img(height = 700, width = 700, src = "february.png")
     }
     else if(input$Month == "March"){
       img(height = 700, width = 700, src = "march.png")
@@ -95,54 +216,6 @@ server <- function(input,output, session){
     }
     
   })
-  
-  # first tab
-  # create the leaflet map 
-  
-  output$harvestbedmap <- renderLeaflet({
-    leaflet(kelp_intersected) %>% 
-      addTiles() %>% 
-      setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) %>%  #pick a prettier basemap
-      addPolygons(data =, fillColor = ~pal(kelp_loss),
-                  weight = 2,
-                  opacity = 1,
-                  color = "white",
-                  dashArray = "3",
-                  fillOpacity = 0.7,
-                  highlight = highlightOptions(
-                    weight = 5,
-                    color = "#666",
-                    dashArray = "",
-                    fillOpacity = 0.7,
-                    bringToFront = TRUE),
-                  layerId = ~polygonID,
-                  label = labels,
-                  labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "15px",
-                    direction = "auto")
-                  
-      )
-    #addCircleMarkers(data = harvest_beds, ~unique(lon), ~unique(lat), layerId = ~unique(KelpBed), popup = ~unique(KelpBed)) 
-  })
-  
-  # generate data in reactive
-  ggplot_data <- reactive({
-    print(input$harvestbedmap_shape_click)
-    kelp <- input$harvestbedmap_shape_click$id
-    print(kelp)
-    
-    data <- kelp_intersected@data[kelp_intersected@data$polygonID %in% kelp,]
-    print(data)
-    data
-    
-  })
-  
-  
-  output$plot <- renderPlot({
-    ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
-      geom_bar(stat = "identity")
-    
-  })
+
 }
 

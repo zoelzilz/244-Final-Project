@@ -21,8 +21,13 @@ library(forcats)
 # the data we need is a SpatialPolygonsDataframe, created in another script (currently in the data_vis_shp.Rmd)
 
 # it is called:
-kelp_intersected <- readOGR(".", layer = "kelp_intersected") %>% 
-  fct_relevel(kelp_intersected@data$month, "Annual", "January", "February", "March", "April", "May", "June", "July", "August", "September","October", "November","December" )
+kelp_intersected <- readOGR(".", layer = "kelp_intersected") #%>% 
+  #fct_relevel(kelp_intersected@data$month, "Annual", "January", "February", "March", "April", "May", "June", "July", "August", "September","October", "November","December" )
+
+#above did not work to relevel, trying instead:
+kelp_intersected@data$month <- factor(kelp_intersected@data$month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+
+#worked
 
 
 # can easily view and access dataframe within using @
@@ -105,7 +110,8 @@ server <- function(input, output) {
   
   output$plot <- renderPlot({
     ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
-      geom_bar(stat = "identity")
+      geom_point()+
+      geom_line(aes(group =1))
   }) 
 }
 
@@ -136,7 +142,8 @@ shinyApp(ui, server)
 #  filter(polygonID == 38850)
 
 #ggplot(data1, aes( month, kelp_loss))+
-#  geom_line() # not working, months in wrong order
+#  geom_line(aes(group=1))+ # not working, why? 
+  ## fixed, needed aes(group=1) for some insane reason
 #  geom_point()
     
 ###############################################
