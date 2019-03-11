@@ -88,7 +88,7 @@ server <- function(input,output, session){
   
   output$harvestbedmap <- renderLeaflet({
     leaflet(kelp_intersected) %>% 
-      addTiles() %>% 
+      addProviderTiles(providers$Esri.WorldImagery) %>% 
       setView(lng = -119.0416309, lat = 33.7494118, zoom = 9) %>%  #pick a prettier basemap
       
       # Kelp Loss polygons (currently not showing all polygons because of layerID)

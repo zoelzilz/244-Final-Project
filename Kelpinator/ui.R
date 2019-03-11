@@ -3,8 +3,13 @@
 #
 ''
 shinyUI( navbarPage("Kelpinator",
+                    
+                    ##define tabs used
+                    #introduction splash
                     tabPanel("App Overview",
-                             "there will be some text here and some pictures and it will be cute"),
+                             includeMarkdown("./md/intro.Rmd"),
+                             hr()
+                             ),
                    
                    ## This panel needs a clickable map input and a barchart output
                    tabPanel("California Kelp Biomass Explorer",
