@@ -4,9 +4,12 @@
 THINGS THAT ARE DONE:
 - all raster map pngs are created (and rae fixed them) and in /www folder
 - abline added to line graph
+- googled polygonID / deleted polygons issue. not sure it is fixable
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT COULD BE DONE
+
+- third tab with reactive financial loss input/output
 
 - ## done ### change legend size, title size (or existence?) on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files. **not too labor intensive but also not a priority**
 
@@ -16,6 +19,10 @@ THINGS THAT COULD BE DONE
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT NEED TO BE DONE
+
+- fix ggplot legend
+- finalize color of dots
+- make dots say something other than "hello!" when clicked
 
 - finalize look and feel of app // make it pretty 
   - padding on the panels or maybe just use html to format these

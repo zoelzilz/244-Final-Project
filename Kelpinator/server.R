@@ -102,7 +102,7 @@ server <- function(input,output, session){
                   highlight = highlightOptions(
                     weight = 5,
                     color = "#666",
-                    dashArray = "",
+                    dashArray = NULL,
                     fillOpacity = 0.7,
                     bringToFront = TRUE
                     ),
@@ -117,7 +117,9 @@ server <- function(input,output, session){
       
       # add a new layer with kelp bed biomass WORK IN PROGRESS -- right now too many circles
       addCircles(data = tomkelp, 
-                       radius = ~0.01*Mean_Biomass,
+                 radius = ~0.01*Mean_Biomass,
+                 color = "yellow",
+                 fillColor = "yellow",
                        lng = ~Lon, 
                        lat = ~Lat, 
                        popup =  "hello!", #~Mean_Biomass, 
@@ -136,7 +138,7 @@ server <- function(input,output, session){
                     color = "darkgreen",
                     dashArray = "",
                     fillOpacity = 0.3,
-                    bringToFront = FALSE),
+                    sendToBack = TRUE),
                   label = labels2,
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", padding = "3px 8px"),
