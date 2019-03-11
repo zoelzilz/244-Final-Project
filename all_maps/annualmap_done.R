@@ -60,15 +60,19 @@ CA <- read_sf("244-extra", layer = "california_county_shape_file") %>%
 tmap_mode("plot")
 
 annual_map <- tm_shape(kelploss_ann) +
-  tm_raster(title = "Heatmap of Annual Kelp Loss")+
+  tm_raster(title = "Annual Kelp Biomass Percent Loss")+
   tm_layout(bg.color = "skyblue",
+            legend.title.size = 2,
             legend.position = c("left","bottom"),
             legend.text.color = "white",
-            legend.text.size = 0.5)+
+            legend.text.size = 1.75,
+            legend.frame = "white",
+            legend.frame.lwd = 2)+
   tm_shape(CA)+
   tm_borders("white", lwd = 2)+
-  tm_fill("darkgreen")
+  tm_fill("darkolivegreen")
+annual_map
 
 ## once the graph is finalized:
-tmap_save(annual_map, "annual.png", height = 10)
+tmap_save(annual_map, "Kelpinator/www/annual.png", height = 10)
 

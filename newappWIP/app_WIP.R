@@ -145,6 +145,7 @@ server <- function(input, output) {
   output$harvestbedmap <- renderLeaflet({
     leaflet(kelp_intersected) %>% 
       addTiles() %>% 
+      addProviderTiles(providers$Stamen.Watercolor) %>% 
       setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) %>%
       addPolygons(data =, fillColor = ~pal(kelp_loss),
                   weight = 2,

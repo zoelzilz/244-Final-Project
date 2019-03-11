@@ -41,12 +41,15 @@ tmap_mode("plot")
 aug_map <- tm_shape(kelploss_aug) +
   tm_raster(title = "Heatmap of August Kelp Loss")+
   tm_layout(bg.color = "skyblue",
+            legend.title.size = 2,
             legend.position = c("left","bottom"),
             legend.text.color = "white",
-            legend.text.size = 0.5)+
+            legend.text.size = 1.75,
+            legend.frame = "white",
+            legend.frame.lwd = 2)+
   tm_shape(CA)+
   tm_borders("white", lwd = 2)+
-  tm_fill("darkgreen")
+  tm_fill("darkolivegreen")
 
 # check the map
 aug_map

@@ -62,7 +62,8 @@ server <- function(input, output) {
   ## leaflet map
   output$harvestbedmap <- renderLeaflet({
     leaflet(kelp_intersected) %>% 
-      addTiles() %>% 
+      #addTiles() %>% 
+      addProviderTiles(providers$Esri.WorldImagery) %>% 
       addPolygons(data =, fillColor = ~pal(kelp_loss),
                   weight = 2,
                   opacity = 1,

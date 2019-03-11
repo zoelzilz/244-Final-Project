@@ -6,39 +6,23 @@ THINGS THAT ARE DONE:
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT COULD BE DONE
-- change legend size, title size (or existence?) on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files. **not too labor intensive but also not a priority**
-
-- figure out how to map the rasters within our existing leaflet -- would be VERY CLEAN and awesome looking but **probably labor intensive and not worth it** plus would take away from one tab
-
-- switch to using plotly (interactive) instead of ggplot
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT NEED TO BE DONE
 
-- REORDER KELP_INTERSECTED@DATA$MONTHS FACTOR SO ITS IN A NORMAL MFCKING ORDER
+- change legend size, title size, base color on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files
 
-- change bar graph to line graph/frequency polygon? (this is proving to be more difficult than i originally thought)
+- switch to using plotly (interactive) instead of ggplot
 
-- figure out and execute: adding historic kelp bed layer onto map
-- figure out how to toggle between layers
-- wrangle kelp biomass data and add clickable variable sized dots layer to leaflet basemap
-
+- change sizes of kelp biomass points 
+- add colors to line graph
 - finalize look and feel of app // make it pretty 
 - write and format intro tab
 
 -------------------------------------------------------------------------------------------------------------
 OTHER PROGRESS NOTES
 
-- everything currently made is combined together as of 10:45 am 3/9
-- app is currently crashing because it cannot load data ONLY IN THE FULL APP - mini (testing_clickable_map) is working fine
-- for some reason adding layerID = ~polygonID instead of ~unique(polygonID) deletes several polygons
-- months are in the wrong order
--coercing ggplot to geom_line is not working, consider switching to plotly
-
-
-
-
-
+- layerID = ~polygonID deletes several polygons
 
 
 
