@@ -24,7 +24,11 @@ kelp_intersected <- readOGR(".", layer = "kelp_intersected")#%>%
 #fct_relevel(kelp_intersected@data$month, "Annual", "January", "February", "March", "April", "May", "June", "July", "August", "September","October", "November","December" )
 
 #above did not work to relevel, trying instead:
-kelp_intersected@data$month <- factor(kelp_intersected@data$month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+kelp_intersected@data$month <- factor(kelp_intersected@data$month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Annual"))
+
+kelp_intersected@data$polygonID <- paste(kelp_intersected@data$lon,kelp_intersected@data$lat)
+#kelp_intersected@data <- kelp_intersected@data %>% 
+#  mutate( polygonID, cbind(lon, lat))
 
 #worked
 # ssh is our significant wave height
@@ -53,7 +57,7 @@ harvest_beds <- spTransform(harvest_beds, CRS("+proj=longlat +ellps=WGS84 +datum
 # setting up labels
 labels <- sprintf(
   "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
-  kelp_intersected@data$KelpBed, kelp_intersected@data$polygonID #can check everything is calling right polgons by changing to polygonID #
+  kelp_intersected@data$KelpBed, kelp_intersected@data$ssh #can check everything is calling right polgons by changing to polygonID #
 ) %>% lapply(htmltools::HTML)
 
 labels2 <- sprintf(
@@ -85,9 +89,9 @@ server <- function(input,output, session){
   output$harvestbedmap <- renderLeaflet({
     leaflet(kelp_intersected) %>% 
       addTiles() %>% 
-      #setView(lng = -118.5204798, lat = 33.95851, zoom = 8.32) %>%  #pick a prettier basemap
+      setView(lng = -119.0416309, lat = 33.7494118, zoom = 9) %>%  #pick a prettier basemap
       
-      
+      # Kelp Loss polygons (currently not showing all polygons because of layerID)
       addPolygons(data = , fillColor = ~pal(kelp_loss), #getPalette(colorCount),
                   group = "Kelp Percent Biomass Loss",
                   weight = 2,
@@ -112,7 +116,8 @@ server <- function(input,output, session){
       
       
       # add a new layer with kelp bed biomass WORK IN PROGRESS -- right now too many circles
-      addCircleMarkers(data = tomkelp, 
+      addCircles(data = tomkelp, 
+                       radius = ~0.01*Mean_Biomass,
                        lng = ~Lon, 
                        lat = ~Lat, 
                        popup =  "hello!", #~Mean_Biomass, 
@@ -138,10 +143,11 @@ server <- function(input,output, session){
                     textsize = "15px",
                     direction = "auto")
       ) %>% 
-      addLayersControl(baseGroups = c("Kelp Percent Biomass Loss", "Current Kelp Biomass"), 
+      addLayersControl(baseGroups = c( "Current Kelp Biomass", "Kelp Percent Biomass Loss"), 
                        overlayGroups = c("Historic Kelp Beds"),
-                       options = layersControlOptions(collapsed = FALSE)) %>% 
-      hideGroup("Current Kelp Biomass")
+                       options = layersControlOptions(collapsed = FALSE),
+                       position = "bottomright")
+      #hideGroup("Current Kelp Biomass")
       #hideGroup("Kelp Percent Biomass Loss")  
       
   })
@@ -158,16 +164,19 @@ server <- function(input,output, session){
     
   })
   output$plot <- renderPlot({
-    ggplot(data = ggplot_data(), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
+    ggplot(data = ggplot_data() %>% filter(month !="Annual"), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
       geom_point(stat = "identity")+
       geom_line(group = 1)+
       ylab("Percent Kelp Biomass Loss")+
       xlab("Month")+
+      geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss, color = "red"))+
       theme_minimal()+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
             panel.background = element_blank(), 
-            axis.line = element_line(colour = "black"))
+            axis.line = element_line(colour = "black"))+
+      theme(axis.text.x=element_text(angle=45,hjust=1))
+      #+geom_label(aes(label = KelpBed),color="green") # JUST WANT TO ADD ONE LABEL THAT PRINTS THE KELP BED JESUS
   })
   
   #######################

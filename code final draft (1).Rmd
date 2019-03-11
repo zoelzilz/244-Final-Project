@@ -9,7 +9,275 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Data Wrangling
+##Packages
+
+```{r}
+#library(purrr)
+#library(sf)
+library(sp)
+library(tmap)
+library(leaflet)
+library(ggrepel)
+library(ggspatial)
+library(RColorBrewer)
+library(fasterize)
+#library(raster)
+library(colorspace)
+library(maptools)
+library(leaflet.minicharts)
+library(rgdal)
+#install.packages("devtools")
+#library(devtools)
+#install_github("gsk3/taRifx.geo")
+#install_github("r-spatial/sf")
+library(taRifx.geo)
+library(tidyverse)
+library(beepr)
+library(praise)
+library(rgeos)
+```
+
+##Loading Data
+
+```{r}
+## loading data with readOGR
+
+# significant wave height shapefiles:
+annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+mar_ogr <- readOGR ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_ogr <- readOGR ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_ogr <- readOGR ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_ogr <- readOGR ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_ogr <- readOGR ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_ogr <- readOGR ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_ogr <- readOGR ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
+dec_ogr <- readOGR ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+
+#historical kelp bed shapefile:
+harvest_beds_ogr <- readOGR("Kelpinator/MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+# Tom Bell's kelp biomass data
+kelp_biomass <- read_csv("Kelpinator/kelp_data_Bell.csv")
+```
+
+##Wrangling Data
+
+```{r}
+# we needed to bind all of the shapefiles together
+# first, the huge significant wave height files
+##sneaky way using taRifx.geo package
+
+# first we added month on to each shapefile so we could tell them apart
+
+annual_ogr@data <- mutate(annual_ogr@data, month = "Annual")
+jan_ogr@data <- mutate(jan_ogr@data, month = "January")
+feb_ogr@data <- mutate(feb_ogr@data, month = "February")
+mar_ogr@data <- mutate(mar_ogr@data, month = "March")
+apr_ogr@data <- mutate(apr_ogr@data, month = "April")
+may_ogr@data <- mutate(may_ogr@data, month = "May")
+jun_ogr@data <- mutate(jun_ogr@data, month = "June")
+jul_ogr@data <- mutate(jul_ogr@data, month = "July")
+aug_ogr@data <- mutate(aug_ogr@data, month = "August")
+sep_ogr@data <- mutate(sep_ogr@data, month = "September")
+oct_ogr@data <- mutate(oct_ogr@data, month = "October")
+nov_ogr@data <- mutate(nov_ogr@data, month = "November")
+dec_ogr@data <- mutate(dec_ogr@data, month = "December")
+
+# tried to add IDs onto each polygon so we could link them together across months later, but that somehow failed and we ended up with polygon IDs that applied to multiple polygons (some in entirely different kelpbeds)
+
+# our next plan was to bind the lat/lons of each polygon's centroid to the data file for each month's shapefile
+
+#####################################################################################################
+#                                  just run all the way through                                     #
+
+#annual_ogr@data <- mutate(annual_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+ann_cents <-  gCentroid(annual_ogr, byid = TRUE)
+ann_coords <- as.data.frame(ann_cents@coords)
+#adding centroids to the @data
+annual_ogr@data <- annual_ogr@data %>% 
+  mutate(lon = ann_coords$x,
+         lat = ann_coords$y)
+
+#jan_ogr@data <- mutate(jan_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jan_cents <-  gCentroid(jan_ogr, byid = TRUE)
+jan_coords <- as.data.frame(jan_cents@coords)
+#adding centroids to the @data
+jan_ogr@data <- jan_ogr@data %>% 
+  mutate(lon = jan_coords$x,
+         lat = jan_coords$y)
+
+#feb_ogr@data <- mutate(feb_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+feb_cents <-  gCentroid(feb_ogr, byid = TRUE)
+feb_coords <- as.data.frame(feb_cents@coords)
+#adding centroids to the @data
+feb_ogr@data <- feb_ogr@data %>% 
+  mutate(lon = feb_coords$x,
+         lat = feb_coords$y)
+
+#mar_ogr@data <- mutate(mar_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+mar_cents <-  gCentroid(mar_ogr, byid = TRUE)
+mar_coords <- as.data.frame(mar_cents@coords)
+#adding centroids to the @data
+mar_ogr@data <- mar_ogr@data %>% 
+  mutate(lon = mar_coords$x,
+         lat = mar_coords$y)
+
+#apr_ogr@data <- mutate(apr_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+apr_cents <-  gCentroid(apr_ogr, byid = TRUE)
+apr_coords <- as.data.frame(apr_cents@coords)
+#adding centroids to the @data
+apr_ogr@data <- apr_ogr@data %>% 
+  mutate(lon = apr_coords$x,
+         lat = apr_coords$y)
+
+#may_ogr@data <- mutate(may_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+may_cents <-  gCentroid(may_ogr, byid = TRUE)
+may_coords <- as.data.frame(may_cents@coords)
+#adding centroids to the @data
+may_ogr@data <- may_ogr@data %>% 
+  mutate(lon = may_coords$x,
+         lat = may_coords$y)
+
+#jun_ogr@data <- mutate(jun_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jun_cents <-  gCentroid(jun_ogr, byid = TRUE)
+jun_coords <- as.data.frame(jun_cents@coords)
+#adding centroids to the @data
+jun_ogr@data <- jun_ogr@data %>% 
+  mutate(lon = jun_coords$x,
+         lat = jun_coords$y)
+
+#jul_ogr@data <- mutate(jul_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jul_cents <-  gCentroid(jul_ogr, byid = TRUE)
+jul_coords <- as.data.frame(jul_cents@coords)
+#adding centroids to the @data
+jul_ogr@data <- jul_ogr@data %>% 
+  mutate(lon = jul_coords$x,
+         lat = jul_coords$y)
+#oops
+jul_ogr@data <- jul_ogr@data %>% 
+  select(jul_ssh, month, lon, lat)
+
+#aug_ogr@data <- mutate(aug_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+aug_cents <-  gCentroid(aug_ogr, byid = TRUE)
+aug_coords <- as.data.frame(aug_cents@coords)
+#adding centroids to the @data
+aug_ogr@data <- aug_ogr@data %>% 
+  mutate(lon = aug_coords$x,
+         lat = aug_coords$y)
+#oops
+aug_ogr@data <- aug_ogr@data %>% 
+  select(aug_ssh, month, lon, lat)
+
+#sep_ogr@data <- mutate(sep_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+sep_cents <-  gCentroid(sep_ogr, byid = TRUE)
+sep_coords <- as.data.frame(sep_cents@coords)
+#adding centroids to the @data
+sep_ogr@data <- sep_ogr@data %>% 
+  mutate(lon = sep_coords$x,
+         lat = sep_coords$y)
+
+#oct_ogr@data <- mutate(oct_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+oct_cents <-  gCentroid(oct_ogr, byid = TRUE)
+oct_coords <- as.data.frame(oct_cents@coords)
+#adding centroids to the @data
+oct_ogr@data <- oct_ogr@data %>% 
+  mutate(lon = oct_coords$x,
+         lat = oct_coords$y)
+
+#nov_ogr@data <- mutate(nov_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+nov_cents <-  gCentroid(nov_ogr, byid = TRUE)
+nov_coords <- as.data.frame(nov_cents@coords)
+#adding centroids to the @data
+nov_ogr@data <- nov_ogr@data %>% 
+  mutate(lon = nov_coords$x,
+         lat = nov_coords$y)
+
+#dec_ogr@data <- mutate(dec_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+dec_cents <-  gCentroid(dec_ogr, byid = TRUE)
+dec_coords <- as.data.frame(feb_cents@coords)
+#adding centroids to the @data
+dec_ogr@data <- dec_ogr@data %>% 
+  mutate(lon = dec_coords$x,
+         lat = dec_coords$y)
+
+##reset all names to ssh so they all match
+names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
+names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
+names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
+names(mar_ogr)[names(mar_ogr)=="mar_ssh"] <- "ssh"
+names(apr_ogr)[names(apr_ogr)=="apr_ssh"] <- "ssh"
+names(may_ogr)[names(may_ogr)=="may_ssh"] <- "ssh"
+names(jun_ogr)[names(jun_ogr)=="jun_ssh"] <- "ssh"
+names(jul_ogr)[names(jul_ogr)=="jul_ssh"] <- "ssh"
+names(aug_ogr)[names(aug_ogr)=="aug_ssh"] <- "ssh"
+names(sep_ogr)[names(sep_ogr)=="sep_ssh"] <- "ssh"
+names(oct_ogr)[names(oct_ogr)=="oct_ssh"] <- "ssh"
+names(nov_ogr)[names(nov_ogr)=="nov_ssh"] <- "ssh"
+names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
+
+##now bind them all one at a time 
+annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
+annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
+annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
+annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
+annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
+annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
+annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
+beep(5)
+
+writeOGR(annDec, dsn = ".", layer = "rbound_months", driver = "ESRI Shapefile")
+beep(2)
+
+# then had to intersect this giant beast with our historic kelp beds shapefile, so that we would only end up with polygons that are inside of kelp beds in California
+
+ogr_annual_intersect2 <- annDec %>% 
+  raster::intersect(harvest_beds_ogr)
+
+# transformed all of the significant wave height data into % kelp loss using a model developed by Rae
+
+ogr_annual_intersect2@data<- ogr_annual_intersect2@data %>% 
+  mutate(kelp_loss = (150.422 * ssh) / (3.54 + ssh))
+
+# checked it
+head(ogr_annual_intersect2@data)
+
+# made this into a spatial polygons dataset now called kelp_intersected
+# and then hopefully we will never need to run this code ever again
+# just kidding we had to run it several more times to fix various things
+
+writeOGR(ogr_annual_intersect2, dsn = ".", layer = "kelp_intersected", driver = "ESRI Shapefile")
+beep(2)
+
+# object, dsn, layer (is the filename), driver (needs to be ESRI Shapefile (capital S) always I think), [there are more options but they're complicated and i'm scared]
+# went super fast
+```
+
+##Making the raster plot output .pngs for the second tab
 
 ```{r}
 

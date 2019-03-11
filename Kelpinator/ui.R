@@ -25,7 +25,7 @@ shinyUI( navbarPage("Kelpinator",
                                           height = "auto",
                                           # set content of panel
                                           h1("Kelp Harvest Bed Explorer"),
-                                          p("This map shows kelp harvest beds in Southern California. Click__ to interactively view how kelp biomass is lost due to wave activity throughout the year. Click ___ to visualize kelp biomass in each historical kelp bed.")
+                                          p("This map shows", em("Macrocystis pyrifera"), "harvest beds in Southern California. Use the buttons below to toggle between interactive visualization of kelp biomass loss due to wave activity throughout the year, or to visualize current kelp biomass in each historical kelp bed. You can also choose to show or hide the historical kelp beds.")
                             ),
                             
                             #panel with the plot

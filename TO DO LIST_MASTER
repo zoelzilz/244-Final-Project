@@ -1,28 +1,53 @@
-3/9/2019
+3/10/2019
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT ARE DONE:
-- all raster map pngs are created and in /www folder
+- all raster map pngs are created (and rae fixed them) and in /www folder
+- abline added to line graph
 
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT COULD BE DONE
 
---------------------------------------------------------------------------------------------------------------
-THINGS THAT NEED TO BE DONE
+- ## done ### change legend size, title size (or existence?) on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files. **not too labor intensive but also not a priority**
 
-- change legend size, title size, base color on the raster map pngs -- will involve re-running 13 simple scripts and overwriting 13 png files
+- ## no ## figure out how to map the rasters within our existing leaflet -- would be VERY CLEAN and awesome looking but **probably labor intensive and not worth it** plus would take away from one tab
 
 - switch to using plotly (interactive) instead of ggplot
 
-- change sizes of kelp biomass points 
-- add colors to line graph
+--------------------------------------------------------------------------------------------------------------
+THINGS THAT NEED TO BE DONE
+
 - finalize look and feel of app // make it pretty 
+  - padding on the panels or maybe just use html to format these
+  - make colors/font/shape of layout and tabs nice feeling
+  - look at some cool apps on gallery and emulate their layouts
 - write and format intro tab
+
+----------------------- done things >> --------------------
+
+- REORDER KELP_INTERSECTED@DATA$MONTHS FACTOR SO ITS IN A NORMAL MFCKING ORDER #done
+
+- change bar graph to line graph/frequency polygon? (this is proving to be more difficult than i originally thought) #done
+
+- figure out and execute: adding historic kelp bed layer onto map #done
+- figure out how to toggle between layers #done
+- wrangle kelp biomass data and add clickable variable sized dots layer to leaflet basemap #done
+
+
 
 -------------------------------------------------------------------------------------------------------------
 OTHER PROGRESS NOTES
 
-- layerID = ~polygonID deletes several polygons
+- everything currently made is combined together as of 10:45 am 3/9
+- app is currently crashing because it cannot load data ONLY IN THE FULL APP - mini (testing_clickable_map) is working fine
+- for some reason adding layerID = ~polygonID instead of ~unique(polygonID) deletes several polygons
+- months are in the wrong order
+-coercing ggplot to geom_line is not working, consider switching to plotly
+
+
+
+
+
 
 
 
