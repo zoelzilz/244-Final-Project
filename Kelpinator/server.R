@@ -190,12 +190,13 @@ server <- function(input,output, session){
       geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss), linetype = 2, size = 2, colour = "coral", show.legend = TRUE)+
       #scale_linetype_manual(name = "--Annual Kelp Loss", values = c(2))+ 
                             #guide = guide_legend(override.aes = list(color = "coral")))+ #legend wont work
-      labs(subtitle = "-- Annual Kelp Loss --")+
+      labs(subtitle = "- - Annual Kelp Loss - -")+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
             panel.background = element_blank(), 
+            axis.title=element_text(size=14),
             axis.line = element_line(colour = "black"),
-            plot.subtitle = element_text( size = 14,face ="bold",hjust = 0.7, vjust = -0.1, color = "coral"),
+            plot.subtitle = element_text( size = 12,face ="bold",hjust = 0.7, vjust = -0.5, color = "coral"),
             axis.text.x=element_text(angle=45, hjust=1))
 
       #scale_y_continuous(limits = c(0, 70))+  # can't make this consistent, loss hugely different between polygons
