@@ -77,11 +77,11 @@ popup2 <- paste0("<strong> Kelp Persistence: </strong>",
 #colourCount <- length(unique(kelp_intersected@data$kelp_loss))
 #getPalette <- colorRampPalette(brewer.pal(9, "Spectral"))
 
-bins <- rev(seq(8,69, 10)) # based on kelp_loss, need to seq from min to max
+bins <- seq(8,69, 10) # based on kelp_loss, need to seq from min to max
 
 
 #defining a color palette, which needs to have at least 68 colors
-pal <- colorBin("RdYlGn", domain = kelp_intersected@data$kelp_loss, bins = bins)
+pal <- colorBin("RdYlGn", domain = kelp_intersected@data$kelp_loss, bins = bins, reverse = TRUE)
 
 ###########################################################################
 

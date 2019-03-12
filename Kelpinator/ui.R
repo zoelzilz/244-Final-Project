@@ -8,9 +8,13 @@ shinyUI( navbarPage("Kelpinator",
                     ##define tabs used
                     #introduction splash
                     tabPanel("App Overview",
-                             includeMarkdown("./md/intro.Rmd"),
+                             fluidRow(
+                               sidebarLayout(position = "right", 
+                                             sidebarPanel(img(src = "kelp_image.jpg", height="600px", width="300px", align="right")),
+                               mainPanel(includeMarkdown("./md/intro.Rmd"),
                              hr()
-                             ),
+                            )))),
+                             
                    
                    ## This panel needs a clickable map input and a barchart output
                    tabPanel("California Kelp Biomass Explorer",
@@ -54,7 +58,7 @@ shinyUI( navbarPage("Kelpinator",
                             # this tab needs to be so much nicer looking
                             
                             fluidRow(column(12,
-                                            h2("Average monthly and annual percent biomass loss for kelp in the Santa Barbara Channel"),
+                                            h2("Average expected monthly and annual biomass loss for kelp in the Santa Barbara Channel"),
           
                                             h4("Use the radio buttons on the left to chose a month for visualizing kelp loss"),
                                             p())),
