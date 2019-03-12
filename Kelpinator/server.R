@@ -46,11 +46,9 @@ harvest_beds <- spTransform(harvest_beds, CRS("+proj=longlat +ellps=WGS84 +datum
 ############################################################################
 # adding some fluff (should go in another script within R file, but not sure what to name that script or how to call)
 
-#creating bins for adding binned color to maps # not even remotely necessary #
-
+#creating bins for adding binned color to maps 
 #max(kelp_intersected@data$kelp_loss)
 #68.37364
-
 #min(kelp_intersected@data$kelp_loss)
 #8.423632
 
@@ -64,6 +62,13 @@ labels2 <- sprintf(
   "<strong>Kelp Bed: %g</strong>",
   harvest_beds@data$KelpBed) %>% 
   lapply(htmltools::HTML)
+
+# setting up popup text
+popup <- paste0("<strong> Kelp Biomass (kg of fresh canopy): </strong>",
+                tomkelp$Mean_Biomass)
+
+popup2 <- paste0("<strong> Proportional Kelp Persistence (proportion of years): </strong>",
+                  tomkelp$Mean_Biomass)
 
 # setting up color palette
 
@@ -92,7 +97,8 @@ server <- function(input,output, session){
       setView(lng = -119.0416309, lat = 33.7494118, zoom = 9) %>%  #pick a prettier basemap
       
       # Kelp Loss polygons (currently not showing all polygons because of layerID)
-      addPolygons(data = , fillColor = ~pal(kelp_loss), #getPalette(colorCount),
+      addPolygons(data = , 
+                  fillColor = ~pal(kelp_loss), #getPalette(colorCount),
                   group = "Kelp Percent Biomass Loss",
                   weight = 2,
                   opacity = 1,
@@ -115,15 +121,25 @@ server <- function(input,output, session){
                   ) %>% 
       
       
-      # add a new layer with kelp bed biomass WORK IN PROGRESS -- right now too many circles
+      # add a new layer with kelp bed biomass 
       addCircles(data = tomkelp, 
                  radius = ~0.01*Mean_Biomass,
                  color = "yellow",
                  fillColor = "yellow",
                        lng = ~Lon, 
                        lat = ~Lat, 
-                       popup =  "hello!", #~Mean_Biomass, 
+                       popup =  popup, 
                        group = "Current Kelp Biomass") %>% 
+      
+      # add a new layer with kelp persistence 
+      addCircles(data = tomkelp, 
+                 radius = ~10000*Kelp_Persistence,
+                 color = "goldenrod",
+                 fillColor = "goldenrod",
+                 lng = ~Lon, 
+                 lat = ~Lat, 
+                 popup =  popup2, 
+                 group = "Kelp Persistence") %>% 
       
       # add historic kelp beds
       addPolygons(data = harvest_beds, fillColor = "green",
@@ -145,10 +161,10 @@ server <- function(input,output, session){
                     textsize = "15px",
                     direction = "auto")
       ) %>% 
-      addLayersControl(baseGroups = c( "Current Kelp Biomass", "Kelp Percent Biomass Loss"), 
+      addLayersControl(baseGroups = c( "Current Kelp Biomass", "Kelp Percent Biomass Loss", "Kelp Persistence"), 
                        overlayGroups = c("Historic Kelp Beds"),
                        options = layersControlOptions(collapsed = FALSE),
-                       position = "bottomright")
+                       position = "bottomleft")
       #hideGroup("Current Kelp Biomass")
       #hideGroup("Kelp Percent Biomass Loss")  
       
@@ -171,13 +187,16 @@ server <- function(input,output, session){
       geom_line(group = 1)+
       ylab("Percent Kelp Biomass Loss")+
       xlab("Month")+
-      geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss, color = "red"))+
+      geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss), linetype = 2, size = 2, colour = "coral", show_guide = TRUE)+
+      #scale_linetype_manual(name = "Annual Kelp Loss", values = c(2), 
+                            #guide = guide_legend(override.aes = list(color = "coral")))+
       theme_minimal()+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
             panel.background = element_blank(), 
             axis.line = element_line(colour = "black"))+
       theme(axis.text.x=element_text(angle=45,hjust=1))
+     
       #+geom_label(aes(label = KelpBed),color="green") # JUST WANT TO ADD ONE LABEL THAT PRINTS THE KELP BED JESUS
   })
   
