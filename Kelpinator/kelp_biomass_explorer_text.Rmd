@@ -1,6 +1,6 @@
 
 <center><h1><span style="color:CadetBlue"> Kelp Harvest Bed Explorer </span></h1></center>
-This map shows *Macrocystis pyrifera* beds in Southern California. Use the buttons in the bottom left to toggle between the following:
+This map shows *Macrocystis pyrifera* beds in southern California. Use the buttons in the bottom left to toggle between the following:
 
 1. Interactive visualization of kelp biomass loss due to wave activity throughout the year.
 

@@ -58,9 +58,9 @@ shinyUI( navbarPage("Kelpinator",
                             # this tab needs to be so much nicer looking
                             
                             fluidRow(column(12,
-                                            h2("Average expected monthly and annual biomass loss for kelp in the Santa Barbara Channel"),
+                                            h2("Average expected monthly and annual Giant kelp biomass loss in the Santa Barbara Channel"),
           
-                                            h4("Use the radio buttons on the left to choose a month to visualize heatmaps of kelp biomass percent loss"),
+                                            h4("Use the radio buttons on the left to choose a month to visualize heatmaps of percent loss of kelp biomass"),
                                             p())),
                             hr(),
                             fluidRow(sidebarPanel(width = 3,

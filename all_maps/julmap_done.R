@@ -39,8 +39,8 @@ CA <- read_sf("244-extra", layer = "california_county_shape_file") %>%
 tmap_mode("plot")
 
 jul_map <- tm_shape(kelploss_jul) +
-  tm_raster(title = "Heatmap of July Kelp Loss")+
-  tm_layout(bg.color = "skyblue",
+  tm_raster(title = "July Kelp Biomass Percent Loss")+
+  tm_layout(bg.color = "cadetblue",
             legend.title.size = 2,
             legend.position = c("left","bottom"),
             legend.text.color = "white",

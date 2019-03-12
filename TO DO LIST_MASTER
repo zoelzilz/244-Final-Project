@@ -1,12 +1,14 @@
 3/10/2019
 
+FUTURE TO DO:
+-- better SWH function (more constrained), work with Tom
+-- contact NREL re: duplicates, see if there has been a list generated or troubleshoot ourselves
+-- get graph output either to hide when toggling off the percent biomass layer OR put the outputs in the same graph box rather than just over the area which actually might clarify things a lot 
+
 FINAL FIXES: 
--- image isn't showing on mine, also make kelp image longer to fill space now longer with data section? or size is actually kinda good
---mother fucker fix the legends on the rasters... need to say percent and currently only annual does? OR put in subtitle maybe also change basemap to darker blue
-
--- can the graph "hide" when the kelp percent biomass loss isn't toggled on? it takes up a lot of the screen OR at least change the order of layers so that kelp percent biomass loss is on first 
-
-
+-- image isn't showing on mine, also make kelp image longer to fill space now longer with data section? or size is actually kinda good --DONE
+--mother fucker fix the legends on the rasters... need to say percent and currently only annual does? OR put in subtitle maybe also change basemap to darker blue --DONE
+-- can the graph "hide" when the kelp percent biomass loss isn't toggled on? it takes up a lot of the screen OR at least change the order of layers so that kelp percent biomass loss is on first --DONE
 --fix sidebar on map, still covering toggle --DONE (moved content to the intro tab)
 -- add "average" to swh when hovering over polygons --DONE
 -- fix grammar/explanation in kelp harvester bed explorer --DONE
@@ -14,10 +16,6 @@ FINAL FIXES:
 -- explain why the circles change size --DONE
 -- change "month"" to "heatmaps" from radio buttons title -- DONE
 -- change color of title on tab 3, change to md? --no, I actually like it white. 
-
-
-
-
 
 
 --------------------------------------------------------------------------------------------------------------

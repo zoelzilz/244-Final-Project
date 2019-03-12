@@ -16,11 +16,11 @@ Navigate through the app by clicking on the tabs at the top. Each tab provides f
 * **Kelp Biomass Loss per Month** : Use the radio buttons on this tab to select the desired month (or annual values) to display a heatmap showing percent loss of kelp biomass throughout the Santa Barbara Channel.
 
 <h3><span style="color:CadetBlue"> What data is used?</span></h3>
- Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly related (Cavanaugh et. al 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
+ Giant kelp biomass percent loss has been non-linearly related (Cavanaugh et. al 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
 
 <center><img src="winter_loss.png"" alt="Winter Loss" width="400"></center>
 
-* Historic Kelp Bed layer available for commercial harvest from California Department of Fish and Wildlife.
+* Historic Kelp Beds available for commercial harvest layer from California Department of Fish and Wildlife.
 * Kelp average biomass and persistence from California Department of Fish and Wildlife aerial surveys (1984-2018) augmented with aerial drone survey data from Dr. Tom Bell.
 * Data for regression analysis: <a href="https://www.researchgate.net/publication/235938668_Environmental_controls_of_giant-kelp_biomass_in_the_Santa_Barbara_Channel_California">Environmental controls of giant-kelp biomass in the Santa Barbara Channel, California (Cavanugh et. al 2011)</a>
 * <a href=" https://maps.nrel.gov/mhk-atlas/">Significant Wave Height Data from the National Renewable Energy Laboratory </a>

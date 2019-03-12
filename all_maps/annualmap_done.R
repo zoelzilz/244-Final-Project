@@ -61,7 +61,7 @@ tmap_mode("plot")
 
 annual_map <- tm_shape(kelploss_ann) +
   tm_raster(title = "Annual Kelp Biomass Percent Loss")+
-  tm_layout(bg.color = "skyblue",
+  tm_layout(bg.color = "cadetblue",
             legend.title.size = 2,
             legend.position = c("left","bottom"),
             legend.text.color = "white",

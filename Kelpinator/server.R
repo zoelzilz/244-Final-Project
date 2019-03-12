@@ -101,7 +101,7 @@ server <- function(input,output, session){
       # Kelp Loss polygons (currently not showing all polygons because of layerID)
       addPolygons(data = , 
                   fillColor = ~pal(kelp_loss), #getPalette(colorCount),
-                  group = "Kelp Percent Biomass Loss",
+                  group = "Kelp Biomass Percent Loss",
                   weight = 2,
                   opacity = 1,
                   color = "white",
@@ -163,7 +163,7 @@ server <- function(input,output, session){
                     textsize = "15px",
                     direction = "auto")
       ) %>% 
-      addLayersControl(baseGroups = c("Kelp Percent Biomass Loss", "Current Kelp Biomass", "Kelp Persistence"), 
+      addLayersControl(baseGroups = c("Kelp Biomass Percent Loss", "Current Kelp Biomass", "Kelp Persistence"), 
                        overlayGroups = c("Historic Kelp Beds"),
                        options = layersControlOptions(collapsed = FALSE),
                        position = "bottomleft")
@@ -187,7 +187,7 @@ server <- function(input,output, session){
     ggplot(data = ggplot_data() %>% filter(month !="Annual"), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
       geom_point(stat = "identity")+
       geom_line(group = 1)+
-      ylab("Percent Kelp Biomass Loss")+
+      ylab("Kelp Biomass Percent Loss")+
       xlab("Month")+
       geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss), linetype = 2, size = 2, colour = "coral", show.legend = TRUE)+
       #scale_linetype_manual(name = "--Annual Kelp Loss", values = c(2))+ 
