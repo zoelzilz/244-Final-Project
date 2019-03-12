@@ -94,7 +94,7 @@ server <- function(input,output, session){
   output$harvestbedmap <- renderLeaflet({
     leaflet(kelp_intersected) %>% 
       addProviderTiles(providers$Esri.WorldImagery) %>% 
-      setView(lng = -119.0416309, lat = 33.7494118, zoom = 9) %>%  #pick a prettier basemap
+      setView(lng = -119.0416309, lat = 33.7494118, zoom = 8) %>%  #pick a prettier basemap
       
       # Kelp Loss polygons (currently not showing all polygons because of layerID)
       addPolygons(data = , 
@@ -195,7 +195,7 @@ server <- function(input,output, session){
             panel.grid.minor = element_blank(),
             panel.background = element_blank(), 
             axis.line = element_line(colour = "black"),
-            plot.subtitle = element_text( size = 18,face ="bold",hjust = 0.7, vjust = -0.1, color = "coral"),
+            plot.subtitle = element_text( size = 14,face ="bold",hjust = 0.7, vjust = -0.1, color = "coral"),
             axis.text.x=element_text(angle=45, hjust=1))
 
       #scale_y_continuous(limits = c(0, 70))+  # can't make this consistent, loss hugely different between polygons

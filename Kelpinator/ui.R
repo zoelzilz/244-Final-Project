@@ -22,15 +22,15 @@ shinyUI( navbarPage("Kelpinator",
                                           class = "panel panel-default",
                                           fixed = T,
                                           draggable = T,
-                                          top = 90,
-                                          left = "auto",
-                                          right = 20,
+                                          top = 100,
+                                          left = 20,
+                                          right = "auto",
                                           bottom = "auto",
                                           width = "25%",
                                           height = "auto",
                                           # set content of panel
-                                          h1("Kelp Harvest Bed Explorer"),
-                                          p("This map shows", em("Macrocystis pyrifera"), "harvest beds in Southern California. Use the buttons below to toggle between interactive visualization of kelp biomass loss due to wave activity throughout the year, or to visualize current kelp biomass in each historical kelp bed. You can also choose to show or hide the historical kelp beds.")
+                                          includeMarkdown("./kelp_biomass_explorer_text.Rmd")
+                                          
                             ),
                             
                             #panel with the plot
@@ -38,26 +38,25 @@ shinyUI( navbarPage("Kelpinator",
                                           class = "panel panel-default",
                                           fixed = T,
                                           draggable = T,
-                                          top = 350,
+                                          top = 100,
                                           left = "auto",
                                           right = 20,
                                           bottom = "auto",
                                           width = "25%",
                                           height = "auto",
-                                          plotOutput("plot", height = 500))
+                                          plotOutput("plot", height = 300))
                    ),
                    
                    ## This panel has a radiobutton menu widget input and a heatmap output
-                   tabPanel("Kelp Biomass Loss per Month",
+                   tabPanel("Heatmaps of Monthly Kelp Biomass Loss",
                             
                             # this tab needs to be so much nicer looking
                             
                             fluidRow(column(12,
-                                            h1("Kelp biomass monthly and annual average percent loss in the Santa Barbara Channel"),
-                                            #p("."),
-                                            #br(),
-                                            h4("Instructions"),
-                                            p("Use the radio buttons on the left to chose a month"))),
+                                            h2("Average monthly and annual percent biomass loss for kelp in the Santa Barbara Channel"),
+          
+                                            h4("Use the radio buttons on the left to chose a month for visualizing kelp loss"),
+                                            p())),
                             hr(),
                             fluidRow(sidebarPanel(width = 3,
                                                   h4("Month"),

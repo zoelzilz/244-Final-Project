@@ -6,6 +6,10 @@ THINGS THAT ARE DONE:
 - abline added to line graph
 - googled polygonID / deleted polygons issue. not sure it is fixable
 
+- fix ggplot legend # done
+- finalize color of dots #done
+- make dots say something other than "hello!" when clicked # done
+
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT COULD BE DONE
 
@@ -20,15 +24,12 @@ THINGS THAT COULD BE DONE
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT NEED TO BE DONE
 
-- fix ggplot legend
-- finalize color of dots
-- make dots say something other than "hello!" when clicked
-
 - finalize look and feel of app // make it pretty 
   - padding on the panels or maybe just use html to format these
   - make colors/font/shape of layout and tabs nice feeling
   - look at some cool apps on gallery and emulate their layouts
 - write and format intro tab
+  - still need to add in a chunk of information about all three of our data sources (both spatialpolygondatasets and the csv from tom)
 
 ----------------------- done things >> --------------------
 
