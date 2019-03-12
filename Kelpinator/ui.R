@@ -3,6 +3,7 @@
 #
 ''
 shinyUI( navbarPage("Kelpinator",
+                    theme = shinytheme("superhero"),
                     
                     ##define tabs used
                     #introduction splash
@@ -48,7 +49,7 @@ shinyUI( navbarPage("Kelpinator",
                    ),
                    
                    ## This panel has a radiobutton menu widget input and a heatmap output
-                   tabPanel("Heatmaps of Monthly Kelp Biomass Loss",
+                   tabPanel("Heatmaps of Monthly Kelp Biomass Loss", 
                             
                             # this tab needs to be so much nicer looking
                             
@@ -80,9 +81,7 @@ shinyUI( navbarPage("Kelpinator",
                                      
                                      # output tab2
                                      mainPanel(uiOutput("heatmap"))
-                            ),
-                            
-                            ## This panel needs three separate dropdowns whose responses interact 
-                            tabPanel("Economic Consequence of Kelp Loss")
+                            )
                    )))
+
 
