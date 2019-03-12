@@ -5,17 +5,16 @@ date: "3/11/2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+<h3><span style="color:CadetBlue"> What is the app?</span></h3>
+This shiny application was created to visualize Giant kelp (*Macrocystis pyrifera*) biomass percent loss in southern California. 
 
-###What is the app?
-This shiny application was created to visualize Giant kelp (Macrocystis pyrifera) biomass percent loss in southern California. 
+This app allows users to interatively explore annual and monthly kelp average biomass loss and average kelp biomass in historic leasable kelp harvest beds as well as visualize heatmaps of annual and monthly expected kelp biomass loss.  Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly related (Cavanaugh et. al 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
 
-This app allows users to interatively explore annual and monthly kelp average biomass loss and average kelp biomass in historic leasable kelp harvest beds as well as visualize heatmaps of annual and monthly expected kelp biomass loss.   
+<center><img src="winter_loss.png"" alt="Winter Loss" width="400"/></center>
 
-Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly related (Cavanaugh 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
-
-###How do I use it?
+<h3><span style="color:CadetBlue"> How do I use it?</span></h3>
 Navigate through the app by clicking on the tabs at the top. Each tab provides further directions and additional information. 
-*Interactive map tab 
+* **California Kelp Biomass Explorer**: This interactive map tab allows the user to view historic kelp beds, and toggle through layers of on Current Kelp Biomass, Kelp Percent Biomass Loss, and Kelp Persistence. Sections of the historic kelpbeds are clickable to display biomass in fresh canopy kg, line graphs of monthly and annually averaged biomass loss, and proportional kelp persistence through time. 
+* **Kelp Biomass Loss per Month** : Use the radio buttons on this tab to select annual or the desired month to display a heatmap of kelp biomass percent loss throughout the Santa Barbara Channel. 
+
+
