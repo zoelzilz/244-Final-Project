@@ -5,32 +5,732 @@ date: "March 7, 2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, eval=FALSE, echo=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Data Wrangling
+##Packages
 
-```{r}
+```{r, eval = FALSE}
+#library(purrr)
+#library(sf)
+library(sp)
+library(tmap)
+library(leaflet)
+library(ggrepel)
+library(ggspatial)
+library(RColorBrewer)
+library(fasterize)
+#library(raster)
+library(colorspace)
+library(maptools)
+library(leaflet.minicharts)
+library(rgdal)
+#install.packages("devtools")
+#library(devtools)
+#install_github("gsk3/taRifx.geo")
+#install_github("r-spatial/sf")
+library(taRifx.geo)
+library(tidyverse)
+library(beepr)
+library(praise)
+library(rgeos)
+```
+
+##Loading Data
+
+```{r, eval = FALSE}
+## loading data with readOGR
+
+# significant wave height shapefiles:
+annual_ogr <- readOGR("244-extra", layer = "vbl_ssh_allreg_annPolygon")
+jan_ogr <- readOGR("244-extra/vbl_ssh_allreg_jan", layer = "vbl_ssh_allreg_janPolygon")
+feb_ogr <- readOGR ("244-extra/vbl_ssh_allreg_feb", layer = "vbl_ssh_allreg_febPolygon")
+mar_ogr <- readOGR ("244-extra/vbl_ssh_allreg_mar", layer = "vbl_ssh_allreg_marPolygon")
+apr_ogr <- readOGR ("244-extra/vbl_ssh_allreg_apr", layer = "vbl_ssh_allreg_aprPolygon")
+may_ogr <- readOGR ("244-extra/vbl_ssh_allreg_may", layer = "vbl_ssh_allreg_mayPolygon")
+jun_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jun", layer = "vbl_ssh_allreg_junPolygon")
+jul_ogr <- readOGR ("244-extra/vbl_ssh_allreg_jul", layer = "vbl_ssh_allreg_julPolygon")
+aug_ogr <- readOGR ("244-extra/vbl_ssh_allreg_aug", layer = "vbl_ssh_allreg_augPolygon")
+sep_ogr <- readOGR ("244-extra/vbl_ssh_allreg_sep", layer = "vbl_ssh_allreg_sepPolygon")
+oct_ogr <- readOGR ("244-extra/vbl_ssh_allreg_oct", layer = "vbl_ssh_allreg_octPolygon")
+nov_ogr <- readOGR ("244-extra/vbl_ssh_allreg_nov", layer = "vbl_ssh_allreg_novPolygon")
+dec_ogr <- readOGR ("244-extra/vbl_ssh_allreg_dec", layer = "vbl_ssh_allreg_decPolygon")
+
+#historical kelp bed shapefile:
+harvest_beds_ogr <- readOGR("Kelpinator/MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds_ogr <- spTransform(harvest_beds_ogr, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+# Tom Bell's kelp biomass data
+kelp_biomass <- read_csv("Kelpinator/kelp_data_Bell.csv")
+```
+
+##Wrangling Data
+
+```{r, eval = FALSE}
+# we needed to bind all of the shapefiles together
+# first, the huge significant wave height files
+##sneaky way using taRifx.geo package
+
+# first we added month on to each shapefile so we could tell them apart
+
+annual_ogr@data <- mutate(annual_ogr@data, month = "Annual")
+jan_ogr@data <- mutate(jan_ogr@data, month = "January")
+feb_ogr@data <- mutate(feb_ogr@data, month = "February")
+mar_ogr@data <- mutate(mar_ogr@data, month = "March")
+apr_ogr@data <- mutate(apr_ogr@data, month = "April")
+may_ogr@data <- mutate(may_ogr@data, month = "May")
+jun_ogr@data <- mutate(jun_ogr@data, month = "June")
+jul_ogr@data <- mutate(jul_ogr@data, month = "July")
+aug_ogr@data <- mutate(aug_ogr@data, month = "August")
+sep_ogr@data <- mutate(sep_ogr@data, month = "September")
+oct_ogr@data <- mutate(oct_ogr@data, month = "October")
+nov_ogr@data <- mutate(nov_ogr@data, month = "November")
+dec_ogr@data <- mutate(dec_ogr@data, month = "December")
+
+# tried to add IDs onto each polygon so we could link them together across months later, but that somehow failed and we ended up with polygon IDs that applied to multiple polygons (some in entirely different kelpbeds)
+
+# our next plan was to bind the lat/lons of each polygon's centroid to the data file for each month's shapefile
+
+#####################################################################################################
+#                                  just run all the way through                                     #
+
+#annual_ogr@data <- mutate(annual_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+ann_cents <-  gCentroid(annual_ogr, byid = TRUE)
+ann_coords <- as.data.frame(ann_cents@coords)
+#adding centroids to the @data
+annual_ogr@data <- annual_ogr@data %>% 
+  mutate(lon = ann_coords$x,
+         lat = ann_coords$y)
+
+#jan_ogr@data <- mutate(jan_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jan_cents <-  gCentroid(jan_ogr, byid = TRUE)
+jan_coords <- as.data.frame(jan_cents@coords)
+#adding centroids to the @data
+jan_ogr@data <- jan_ogr@data %>% 
+  mutate(lon = jan_coords$x,
+         lat = jan_coords$y)
+
+#feb_ogr@data <- mutate(feb_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+feb_cents <-  gCentroid(feb_ogr, byid = TRUE)
+feb_coords <- as.data.frame(feb_cents@coords)
+#adding centroids to the @data
+feb_ogr@data <- feb_ogr@data %>% 
+  mutate(lon = feb_coords$x,
+         lat = feb_coords$y)
+
+#mar_ogr@data <- mutate(mar_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+mar_cents <-  gCentroid(mar_ogr, byid = TRUE)
+mar_coords <- as.data.frame(mar_cents@coords)
+#adding centroids to the @data
+mar_ogr@data <- mar_ogr@data %>% 
+  mutate(lon = mar_coords$x,
+         lat = mar_coords$y)
+
+#apr_ogr@data <- mutate(apr_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+apr_cents <-  gCentroid(apr_ogr, byid = TRUE)
+apr_coords <- as.data.frame(apr_cents@coords)
+#adding centroids to the @data
+apr_ogr@data <- apr_ogr@data %>% 
+  mutate(lon = apr_coords$x,
+         lat = apr_coords$y)
+
+#may_ogr@data <- mutate(may_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+may_cents <-  gCentroid(may_ogr, byid = TRUE)
+may_coords <- as.data.frame(may_cents@coords)
+#adding centroids to the @data
+may_ogr@data <- may_ogr@data %>% 
+  mutate(lon = may_coords$x,
+         lat = may_coords$y)
+
+#jun_ogr@data <- mutate(jun_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jun_cents <-  gCentroid(jun_ogr, byid = TRUE)
+jun_coords <- as.data.frame(jun_cents@coords)
+#adding centroids to the @data
+jun_ogr@data <- jun_ogr@data %>% 
+  mutate(lon = jun_coords$x,
+         lat = jun_coords$y)
+
+#jul_ogr@data <- mutate(jul_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+jul_cents <-  gCentroid(jul_ogr, byid = TRUE)
+jul_coords <- as.data.frame(jul_cents@coords)
+#adding centroids to the @data
+jul_ogr@data <- jul_ogr@data %>% 
+  mutate(lon = jul_coords$x,
+         lat = jul_coords$y)
+#oops
+jul_ogr@data <- jul_ogr@data %>% 
+  select(jul_ssh, month, lon, lat)
+
+#aug_ogr@data <- mutate(aug_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+aug_cents <-  gCentroid(aug_ogr, byid = TRUE)
+aug_coords <- as.data.frame(aug_cents@coords)
+#adding centroids to the @data
+aug_ogr@data <- aug_ogr@data %>% 
+  mutate(lon = aug_coords$x,
+         lat = aug_coords$y)
+#oops
+aug_ogr@data <- aug_ogr@data %>% 
+  select(aug_ssh, month, lon, lat)
+
+#sep_ogr@data <- mutate(sep_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+sep_cents <-  gCentroid(sep_ogr, byid = TRUE)
+sep_coords <- as.data.frame(sep_cents@coords)
+#adding centroids to the @data
+sep_ogr@data <- sep_ogr@data %>% 
+  mutate(lon = sep_coords$x,
+         lat = sep_coords$y)
+
+#oct_ogr@data <- mutate(oct_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+oct_cents <-  gCentroid(oct_ogr, byid = TRUE)
+oct_coords <- as.data.frame(oct_cents@coords)
+#adding centroids to the @data
+oct_ogr@data <- oct_ogr@data %>% 
+  mutate(lon = oct_coords$x,
+         lat = oct_coords$y)
+
+#nov_ogr@data <- mutate(nov_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+nov_cents <-  gCentroid(nov_ogr, byid = TRUE)
+nov_coords <- as.data.frame(nov_cents@coords)
+#adding centroids to the @data
+nov_ogr@data <- nov_ogr@data %>% 
+  mutate(lon = nov_coords$x,
+         lat = nov_coords$y)
+
+#dec_ogr@data <- mutate(dec_ogr@data, polygonID = seq(1, 63623, 1))
+# create a DF of centroids
+dec_cents <-  gCentroid(dec_ogr, byid = TRUE)
+dec_coords <- as.data.frame(feb_cents@coords)
+#adding centroids to the @data
+dec_ogr@data <- dec_ogr@data %>% 
+  mutate(lon = dec_coords$x,
+         lat = dec_coords$y)
+
+##reset all names to ssh so they all match
+names(annual_ogr)[names(annual_ogr)=="ann_ssh"] <- "ssh" #this worked
+names(jan_ogr)[names(jan_ogr)=="jan_ssh"] <- "ssh"
+names(feb_ogr)[names(feb_ogr)=="feb_ssh"] <- "ssh"
+names(mar_ogr)[names(mar_ogr)=="mar_ssh"] <- "ssh"
+names(apr_ogr)[names(apr_ogr)=="apr_ssh"] <- "ssh"
+names(may_ogr)[names(may_ogr)=="may_ssh"] <- "ssh"
+names(jun_ogr)[names(jun_ogr)=="jun_ssh"] <- "ssh"
+names(jul_ogr)[names(jul_ogr)=="jul_ssh"] <- "ssh"
+names(aug_ogr)[names(aug_ogr)=="aug_ssh"] <- "ssh"
+names(sep_ogr)[names(sep_ogr)=="sep_ssh"] <- "ssh"
+names(oct_ogr)[names(oct_ogr)=="oct_ssh"] <- "ssh"
+names(nov_ogr)[names(nov_ogr)=="nov_ssh"] <- "ssh"
+names(dec_ogr)[names(dec_ogr)=="dec_ssh"] <- "ssh"
+
+##now bind them all one at a time 
+annJan <- rbind(annual_ogr, jan_ogr, fix.duplicated.IDs = TRUE) #now it works!
+annFeb <- rbind(annJan, feb_ogr, fix.duplicated.IDs = TRUE)
+annMar <- rbind(annFeb, mar_ogr, fix.duplicated.IDs = TRUE)
+annApr <- rbind(annMar, apr_ogr, fix.duplicated.IDs = TRUE)
+annMay <- rbind(annApr, may_ogr, fix.duplicated.IDs = TRUE)
+annJun <- rbind(annMay, jun_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annJul <- rbind(annJun, jul_ogr, fix.duplicated.IDs = TRUE)
+annAug <- rbind(annJul, aug_ogr, fix.duplicated.IDs = TRUE)
+annSep <- rbind(annAug, sep_ogr, fix.duplicated.IDs = TRUE)
+annOct <- rbind(annSep, oct_ogr, fix.duplicated.IDs = TRUE)
+beep(2)
+annNov <- rbind(annOct, nov_ogr, fix.duplicated.IDs = TRUE)
+annDec <- rbind(annNov, dec_ogr, fix.duplicated.IDs = TRUE)
+beep(5)
+
+writeOGR(annDec, dsn = ".", layer = "rbound_months", driver = "ESRI Shapefile")
+beep(2)
+
+# then had to intersect this giant beast with our historic kelp beds shapefile, so that we would only end up with polygons that are inside of kelp beds in California
+
+ogr_annual_intersect2 <- annDec %>% 
+  raster::intersect(harvest_beds_ogr)
+
+# transformed all of the significant wave height data into % kelp loss using a model developed by Rae
+#S <- SWH_SB_Cavanaugh1$Max_Wave_Height
+#v <- SWH_SB_Cavanaugh1$Percent_Loss
+#mm <- data.frame(S,v)
+#wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+#Non-linear equation:
+#Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
+
+ogr_annual_intersect2@data<- ogr_annual_intersect2@data %>% 
+  mutate(kelp_loss = (150.422 * ssh) / (3.54 + ssh))
+
+# checked it
+head(ogr_annual_intersect2@data)
+
+# made this into a spatial polygons dataset now called kelp_intersected
+# and then hopefully we will never need to run this code ever again
+# just kidding we had to run it several more times to fix various things
+
+writeOGR(ogr_annual_intersect2, dsn = ".", layer = "kelp_intersected", driver = "ESRI Shapefile")
+beep(2)
+
+# object, dsn, layer (is the filename), driver (needs to be ESRI Shapefile (capital S) always I think), [there are more options but they're complicated and i'm scared]
+# went super fast
+```
+
+##Making the raster plot output .pngs for the second tab
+
+```{r, eval = FALSE}
+# EXAMPLE CODE WITH ANNUAL DATA
+
+################### output heatmaps ####################
+
+library(sf)
+library(tmap)
+library(leaflet)
+library(ggrepel)
+library(ggspatial)
+library(RColorBrewer)
+library(fasterize)
+library(raster)
+library(colorspace)
+library(ggplot2)
+library(rasterVis)
+library(rgdal)
+
+### NOTES ###
+#
+# should we just leave this in wave height? or do we want to go thoruhg the backflipping of converting everything using rae's equation = kelp loss?
+#
+# if we want to convert, we can use projectRaster, i think, from Lab 7 
+
+
+############  ANNUAL GRAPH ################
+
+annual_swh <- read_sf ("244-extra", layer = "vbl_ssh_allreg_annPolygon") #244-extra is the folder it's in within this working directory
+#annual_swh
+SWH_SB_Cavanaugh1 <- read_csv("SWH_SB_Cavanaugh1.csv")
+
+ext1 <- extent(-120.68, -117.25, 32.15, 34.71) # SOMETHING IS WRONG WITH THIS BOX?
+gridsize1 <- 0.083
+r1 <- raster(ext1, res=gridsize1)
+
+##make cropped vector for southern california to rasterize; seems easier to crop the vector first rather than cropping the raster after
+crop_annual <- st_crop(annual_swh, c(xmin=-120.68, xmax=-117.25, ymin=32.15, ymax=34.71)) #look up exact bounding box from arpa-e
+
+crop_socal_ras2 <- fasterize(crop_annual, r1, field = "ann_ssh") #used cropped vector and new cropped raster; this method appears identical
+crop_socal_ras2
+
+kelploss_ann <- (150.422 * crop_socal_ras2) / (3.54 + crop_socal_ras2)  #(ADD IN THE EQUATION HERE) ### here we will add in equation and then plot (rae)
+
+#S <- SWH_SB_Cavanaugh1$Max_Wave_Height
+#v <- SWH_SB_Cavanaugh1$Percent_Loss
+#mm <- data.frame(S,v)
+#wave_model <- nls(v ~ Vm * S/(K+S), data = mm, start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+#Non-linear equation:
+#Macrocystis biomass loss (%) = [150.422 (significant wave height) / (3.54 + significant wave height)
+
+CA <- read_sf("244-extra", layer = "california_county_shape_file") %>% 
+  dplyr::select(STATE)
+
+tmap_mode("plot")
+
+annual_map <- tm_shape(kelploss_ann) +
+  tm_raster(title = "Annual Kelp Biomass Percent Loss")+
+  tm_layout(bg.color = "cadetblue",
+            legend.title.size = 2,
+            legend.position = c("left","bottom"),
+            legend.text.color = "white",
+            legend.text.size = 1.75,
+            legend.frame = "white",
+            legend.frame.lwd = 2)+
+  tm_shape(CA)+
+  tm_borders("white", lwd = 2)+
+  tm_fill("darkolivegreen")
+annual_map
+
+## once the graph is finalized:
+tmap_save(annual_map, "Kelpinator/www/annual.png", height = 10)
+
 
 ```
 
 
 ##Server
 
-```{r}
+```{r, eval = FALSE}
+#
+# This is the server logic of a Shiny web application. You can run the 
+# application by clicking 'Run App' above.
+#
+# called once each session
+
+library(leaflet)
+library(shiny)
+library(ggplot2)
+#library(sf)
+library(tidyverse)
+library(rgdal)
+library(RColorBrewer)
+library(rcartocolor)
+library(shinythemes)
+
+###################################################################################################
+#load the data
+###################################################################################################
+
+# the map data we need is a SpatialPolygonsDataframe, created in another script 
+# (currently in the data_vis_shp.Rmd) and saved as a new SPD
+
+# it is called:
+kelp_intersected <- readOGR(".", layer = "kelp_intersected")#%>% 
+#fct_relevel(kelp_intersected@data$month, "Annual", "January", "February", "March", "April", "May", "June", "July", "August", "September","October", "November","December" )
+
+#above did not work to relevel, trying instead:
+kelp_intersected@data$month <- factor(kelp_intersected@data$month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Annual"))
+
+kelp_intersected@data$polygonID <- paste(kelp_intersected@data$lon,kelp_intersected@data$lat)
+#kelp_intersected@data <- kelp_intersected@data %>% 
+#  mutate( polygonID, cbind(lon, lat))
+
+#worked
+# ssh is our significant wave height
+# kelp_loss is our main response variable
+
+# also loading Tom's kelp data
+
+tomkelp<- read_csv ("kelp_data_Bell.csv")
+
+# we also need the historic kelp bed data, separately i think
+
+harvest_beds <- readOGR("MAN_CA_KelpAdmin", layer = "MAN_CA_KelpAdmin") 
+harvest_beds <- spTransform(harvest_beds, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+############################################################################
+# adding some fluff (should go in another script within R file, but not sure what to name that script or how to call)
+
+#creating bins for adding binned color to maps 
+#max(kelp_intersected@data$kelp_loss)
+#68.37364
+#min(kelp_intersected@data$kelp_loss)
+#8.423632
+
+# setting up labels
+labels <- sprintf(
+  "<strong>Kelp Bed: %g</strong><br/> Mean Significant Wave Height: %s ",
+  kelp_intersected@data$KelpBed, kelp_intersected@data$ssh #can check everything is calling right polgons by changing to polygonID #
+) %>% lapply(htmltools::HTML)
+
+labels2 <- sprintf(
+  "<strong>Kelp Bed: %g</strong>",
+  harvest_beds@data$KelpBed) %>% 
+  lapply(htmltools::HTML)
+
+# setting up popup text
+popup <- paste0("<strong> Kelp Biomass (kg of fresh canopy): </strong>",
+                tomkelp$Mean_Biomass)
+
+popup2 <- paste0("<strong> Kelp Persistence: </strong>",
+                  tomkelp$Kelp_Persistence)
+
+# setting up color palette
+
+#colourCount <- length(unique(kelp_intersected@data$kelp_loss))
+#getPalette <- colorRampPalette(brewer.pal(9, "Spectral"))
+
+bins <- seq(8,69, 10) # based on kelp_loss, need to seq from min to max
+
+
+#defining a color palette, which needs to have at least 68 colors
+pal <- colorBin("RdYlGn", domain = kelp_intersected@data$kelp_loss, bins = bins, reverse = TRUE)
+
+###########################################################################
+
+###################################################################################################
+
+server <- function(input,output, session){
+
+  
+  # first tab
+  # create the leaflet map 
+  
+  output$harvestbedmap <- renderLeaflet({
+    leaflet(kelp_intersected) %>% 
+      addProviderTiles(providers$Esri.WorldImagery) %>% 
+      setView(lng = -119.0416309, lat = 33.7494118, zoom = 8) %>%  #pick a prettier basemap
+      
+      # Kelp Loss polygons (currently not showing all polygons because of layerID)
+      addPolygons(data = , 
+                  fillColor = ~pal(kelp_loss), #getPalette(colorCount),
+                  group = "Kelp Biomass Percent Loss",
+                  weight = 2,
+                  opacity = 1,
+                  color = "white",
+                  dashArray = "3",
+                  fillOpacity = 0.7,
+                  highlight = highlightOptions(
+                    weight = 5,
+                    color = "#666",
+                    dashArray = NULL,
+                    fillOpacity = 0.7,
+                    bringToFront = TRUE
+                    ),
+                  layerId = ~polygonID,
+                  label = labels,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")
+                  ) %>% 
+      
+      
+      # add a new layer with kelp bed biomass 
+      addCircles(data = tomkelp, 
+                 radius = ~0.01*Mean_Biomass,
+                 color = "yellow",
+                 fillColor = "yellow",
+                       lng = ~Lon, 
+                       lat = ~Lat, 
+                       popup =  popup, 
+                       group = "Current Kelp Biomass") %>% 
+      
+      # add a new layer with kelp persistence 
+      addCircles(data = tomkelp, 
+                 radius = ~3000*Kelp_Persistence,
+                 color = "goldenrod",
+                 fillColor = "goldenrod",
+                 lng = ~Lon, 
+                 lat = ~Lat, 
+                 popup =  popup2, 
+                 group = "Kelp Persistence") %>% 
+      
+      # add historic kelp beds
+      addPolygons(data = harvest_beds, fillColor = "green",
+                  group = "Historic Kelp Beds",
+                  weight = 2,
+                  opacity = 1,
+                  color = "green",
+                  dashArray = "3",
+                  fillOpacity = 0.3,
+                  highlight = highlightOptions(
+                    weight = 5,
+                    color = "darkgreen",
+                    dashArray = "",
+                    fillOpacity = 0.3,
+                    sendToBack = TRUE),
+                  label = labels2,
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", padding = "3px 8px"),
+                    textsize = "15px",
+                    direction = "auto")
+      ) %>% 
+      addLayersControl(baseGroups = c("Kelp Biomass Percent Loss", "Current Kelp Biomass", "Kelp Persistence"), 
+                       overlayGroups = c("Historic Kelp Beds"),
+                       options = layersControlOptions(collapsed = FALSE),
+                       position = "bottomleft")
+      #hideGroup("Current Kelp Biomass")
+      #hideGroup("Kelp Percent Biomass Loss")  
+      
+  })
+  
+  # generate data in reactive
+  ggplot_data <- reactive({
+    print(input$harvestbedmap_shape_click)
+    kelp <- input$harvestbedmap_shape_click$id
+    print(kelp)
+    
+    data <- kelp_intersected@data[kelp_intersected@data$polygonID %in% kelp,]
+    print(data)
+    data
+    
+  })
+  output$plot <- renderPlot({
+    ggplot(data = ggplot_data() %>% filter(month !="Annual"), aes(month, kelp_loss)) + # idk what the parenthenses do but without them it throws an error about data object being wrong type
+      geom_point(stat = "identity")+
+      geom_line(group = 1)+
+      ylab("Kelp Biomass Percent Loss")+
+      xlab("Month")+
+      geom_hline(data = ggplot_data() %>% filter(month == "Annual"), aes(yintercept = kelp_loss), linetype = 2, size = 2, colour = "coral", show.legend = TRUE)+
+      #scale_linetype_manual(name = "--Annual Kelp Loss", values = c(2))+ 
+                            #guide = guide_legend(override.aes = list(color = "coral")))+ #legend wont work
+      labs(subtitle = "- - Annual Kelp Loss - -")+
+      theme(panel.grid.major = element_blank(), 
+            panel.grid.minor = element_blank(),
+            panel.background = element_blank(), 
+            axis.title=element_text(size=14),
+            axis.line = element_line(colour = "black"),
+            plot.subtitle = element_text( size = 12,face ="bold",hjust = 0.7, vjust = -0.5, color = "coral"),
+            axis.text.x=element_text(angle=45, hjust=1))
+
+      #scale_y_continuous(limits = c(0, 70))+  # can't make this consistent, loss hugely different between polygons
+      
+    
+    
+     
+      #+geom_label(aes(label = KelpBed),color="green") # JUST WANT TO ADD ONE LABEL THAT PRINTS THE KELP BED JESUS
+  })
+  
+  #######################
+  # maps output for tab 2
+  ########################
+  
+  output$heatmap <- renderUI({
+    if(input$Month == "Annual"){            
+      img(height = 700, width = 700, src = "annual.png")
+    }                                        
+    else if(input$Month == "January"){
+      img(height = 700, width = 700, src = "january.png")
+    }
+    else if(input$Month == "February"){
+      img(height = 700, width = 700, src = "february.png")
+    }
+    else if(input$Month == "March"){
+      img(height = 700, width = 700, src = "march.png")
+    }
+    else if(input$Month == "April"){
+      img(height = 700, width = 700, src = "april.png")
+    }
+    else if(input$Month == "May"){
+      img(height = 700, width = 700, src = "May.png")
+    }
+    else if(input$Month == "June"){
+      img(height = 700, width = 700, src = "june.png")
+    }
+    else if(input$Month == "July"){
+      img(height = 700, width = 700, src = "july.png")
+    }
+    else if(input$Month == "August"){
+      img(height = 700, width = 700, src = "August.png")
+    }
+    else if(input$Month == "September"){
+      img(height = 700, width = 700, src = "September.png")
+    }
+    else if(input$Month == "October"){
+      img(height = 700, width = 700, src = "October.png")
+    }
+    else if(input$Month == "November"){
+      img(height = 700, width = 700, src = "November.png")
+    }
+    else if(input$Month == "December"){
+      img(height = 700, width = 700, src = "December.png")
+    }
+    
+  })
+
+}
+
 
 ```
 
 ##UI
 
-```{r}
+```{r, eval = FALSE}
+#
+# This is the user-interface definition
+#
+''
+shinyUI( navbarPage("Kelpinator",
+                    theme = shinytheme("superhero"),
+                    
+                    ##define tabs used
+                    #introduction splash
+                    tabPanel("App Overview",
+                             fluidRow(
+                               sidebarLayout(position = "right", 
+                                             sidebarPanel(img(src = "kelp_image.jpg", height="600px", width="300px", align="right")),
+                               mainPanel(includeMarkdown("./md/intro.Rmd"),
+                             hr()
+                            )))),
+                             
+                   
+                   ## This panel needs a clickable map input and a barchart output
+                   tabPanel("California Kelp Biomass Explorer",
+                            
+                            # plot the map
+                            leafletOutput("harvestbedmap", height = 653),
+                           
+                            # add the header/info panel
+                            absolutePanel(id = "description",
+                                          class = "panel panel-default",
+                                          fixed = T,
+                                          draggable = T,
+                                          top = 100,
+                                          left = 20,
+                                          right = "auto",
+                                          bottom = "auto",
+                                          width = "25%",
+                                          height = "auto",
+                                          # set content of panel
+                                          includeMarkdown("./kelp_biomass_explorer_text.Rmd")
+                                          
+                            ),
+                            
+                            #panel with the plot
+                            absolutePanel(id = "plot",
+                                          class = "panel panel-default",
+                                          fixed = T,
+                                          draggable = T,
+                                          top = 100,
+                                          left = "auto",
+                                          right = 20,
+                                          bottom = "auto",
+                                          width = "25%",
+                                          height = "auto",
+                                          plotOutput("plot", height = 300))
+                   ),
+                   
+                   ## This panel has a radiobutton menu widget input and a heatmap output
+                   tabPanel("Heatmaps of Monthly Kelp Biomass Loss", 
+                            
+                            # this tab needs to be so much nicer looking
+                            
+                            fluidRow(column(12,
+                                            h2("Average expected monthly and annual Giant kelp biomass loss in the Santa Barbara Channel"),
+          
+                                            h4("Use the radio buttons on the left to choose a month to visualize heatmaps of percent loss of kelp biomass"),
+                                            p())),
+                            hr(),
+                            fluidRow(sidebarPanel(width = 3,
+                                                  h4("Heatmaps"),
+                                                  helpText("Chose from the following:"),
+                                                  
+                                                  # input tab2
+                                                  radioButtons("Month", NULL,
+                                                               c("Annual" = "Annual",
+                                                                 "January" = "January",
+                                                                 "February" = "February",
+                                                                 "March" = "March",
+                                                                 "April" = "April",
+                                                                 "May" = "May",
+                                                                 "June" = "June",
+                                                                 "July" = "July",
+                                                                 "August" = "August",
+                                                                 "September" = "September",
+                                                                 "October" = "October",
+                                                                 "November" = "November",
+                                                                 "December" = "December"))),
+                                     
+                                     # output tab2
+                                     mainPanel(uiOutput("heatmap"))
+                            )
+                   )))
+
+
 
 ```
 
-##Global
+##Problems we ran into
 
-```{r}
+- mismatched polygon IDs in our data -> causing polygons to delete   
+  - because of accidental weirdness in the data itself  
+  
+- rbinding all of the 13 data frames together AND intersecting them with our kelp beds data took   FOREVER and we had to do it multiple times to add various columns of information  
 
-```
+##Things that would be great!
 
+- removing the graph background from the map tab when the layer it pulls data from isn't selected
