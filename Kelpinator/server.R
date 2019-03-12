@@ -11,6 +11,8 @@ library(ggplot2)
 library(tidyverse)
 library(rgdal)
 library(RColorBrewer)
+library(rcartocolor)
+library(shinythemes)
 
 ###################################################################################################
 #load the data
@@ -75,11 +77,11 @@ popup2 <- paste0("<strong> Kelp Persistence: </strong>",
 #colourCount <- length(unique(kelp_intersected@data$kelp_loss))
 #getPalette <- colorRampPalette(brewer.pal(9, "Spectral"))
 
-bins <- seq(8,68, 10) # based on kelp_loss, need to seq from min to max
+bins <- rev(seq(8,69, 10)) # based on kelp_loss, need to seq from min to max
 
 
 #defining a color palette, which needs to have at least 68 colors
-pal <- colorBin("Spectral", domain = kelp_intersected@data$kelp_loss, bins = bins)
+pal <- colorBin("RdYlGn", domain = kelp_intersected@data$kelp_loss, bins = bins)
 
 ###########################################################################
 
