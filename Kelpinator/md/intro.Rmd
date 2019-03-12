@@ -6,17 +6,25 @@ output: html_document
 ---
 
 <h3><span style="color:CadetBlue"> What is this app?</span></h3>
-This shiny application was created to visualize Giant kelp (*Macrocystis pyrifera*) biomass percent loss in southern California. 
+This shiny application was created to visualize percent loss of Giant kelp (*Macrocystis pyrifera*) biomass in southern California. 
 
-This app allows users to interatively explore annual and monthly kelp average biomass loss and average kelp biomass in historic leasable kelp harvest beds as well as visualize heatmaps of annual and monthly expected kelp biomass loss.  Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly related (Cavanaugh et. al 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
-
-
-<center><img src="winter_loss.png"" alt="Winter Loss" width="400"></center>
+This app allows users to interatively explore annual and monthly kelp average percent biomass loss, average kelp persistence, and average kelp biomass in historic leasable kelp harvest beds. The persistence of kelp beds is calculated by taking the proportion of years (1984 - 2018) where kelp canopy was observed in a 1 kilometer cell (as a fraction of the total area of the kelp in that cell). Additionally, the user can visualize heatmaps of annual and monthly expected kelp biomass loss. 
 
 <h3><span style="color:CadetBlue"> How do I use it?</span></h3>
 Navigate through the app by clicking on the tabs at the top. Each tab provides further directions and additional information. 
-* **California Kelp Biomass Explorer**: This interactive map tab allows the user to view historic kelp beds, and toggle through layers of on Current Kelp Biomass, Kelp Percent Biomass Loss, and Kelp Persistence. Sections of the historic kelpbeds are clickable to display biomass in fresh canopy kg, line graphs of monthly and annually averaged biomass loss, and proportional kelp persistence through time. 
-* **Kelp Biomass Loss per Month** : Use the radio buttons on this tab to select annual or the desired month to display a heatmap of kelp biomass percent loss throughout the Santa Barbara Channel.
+* **California Kelp Biomass Explorer**: This interactive map tab allows the user to view historic kelp beds, and toggle through layers of Current Kelp Biomass, Kelp Percent Biomass Loss, and Kelp Persistence. Sections of the historic kelpbeds are clickable to display line graphs of monthly and annually averaged biomass loss. Hovering over Kelp Persistence or Kelp Biomass circles makes those values pop up. The size of the circles for Kelp Persistence and Kelp Biomass correspond to their magnitude. 
+* **Kelp Biomass Loss per Month** : Use the radio buttons on this tab to select the desired month (or annual values) to display a heatmap showing percent loss of kelp biomass throughout the Santa Barbara Channel.
+
+<h3><span style="color:CadetBlue"> What data is used?</span></h3>
+ Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly related (Cavanaugh et. al 2011) to significant wave height using data from  winter storms in the Santa Barbara Channel.
+
+<center><img src="winter_loss.png"" alt="Winter Loss" width="400"></center>
+
+* Historic Kelp Bed layer available for commercial harvest from California Department of Fish and Wildlife.
+* Kelp average biomass and persistence from California Department of Fish and Wildlife aerial surveys (1984-2018) augmented with aerial drone survey data from Dr. Tom Bell.
+* Data for regression analysis: <a href="https://www.researchgate.net/publication/235938668_Environmental_controls_of_giant-kelp_biomass_in_the_Santa_Barbara_Channel_California">Environmental controls of giant-kelp biomass in the Santa Barbara Channel, California (Cavanugh et. al 2011)</a>
+* <a href=" https://maps.nrel.gov/mhk-atlas/">Significant Wave Height Data from the National Renewable Energy Laboratory </a>
+
 
 
 

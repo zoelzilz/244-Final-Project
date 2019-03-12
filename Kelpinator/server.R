@@ -56,7 +56,7 @@ harvest_beds <- spTransform(harvest_beds, CRS("+proj=longlat +ellps=WGS84 +datum
 
 # setting up labels
 labels <- sprintf(
-  "<strong>Kelp Bed: %g</strong><br/> Significant Wave Height: %s ",
+  "<strong>Kelp Bed: %g</strong><br/> Mean Significant Wave Height: %s ",
   kelp_intersected@data$KelpBed, kelp_intersected@data$ssh #can check everything is calling right polgons by changing to polygonID #
 ) %>% lapply(htmltools::HTML)
 
@@ -163,7 +163,7 @@ server <- function(input,output, session){
                     textsize = "15px",
                     direction = "auto")
       ) %>% 
-      addLayersControl(baseGroups = c( "Current Kelp Biomass", "Kelp Percent Biomass Loss", "Kelp Persistence"), 
+      addLayersControl(baseGroups = c("Kelp Percent Biomass Loss", "Current Kelp Biomass", "Kelp Persistence"), 
                        overlayGroups = c("Historic Kelp Beds"),
                        options = layersControlOptions(collapsed = FALSE),
                        position = "bottomleft")

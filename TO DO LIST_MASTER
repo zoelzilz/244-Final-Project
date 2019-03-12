@@ -1,5 +1,25 @@
 3/10/2019
 
+FINAL FIXES: 
+-- image isn't showing on mine, also make kelp image longer to fill space now longer with data section? or size is actually kinda good
+--mother fucker fix the legends on the rasters... need to say percent and currently only annual does? OR put in subtitle maybe also change basemap to darker blue
+
+-- can the graph "hide" when the kelp percent biomass loss isn't toggled on? it takes up a lot of the screen OR at least change the order of layers so that kelp percent biomass loss is on first 
+
+
+--fix sidebar on map, still covering toggle --DONE (moved content to the intro tab)
+-- add "average" to swh when hovering over polygons --DONE
+-- fix grammar/explanation in kelp harvester bed explorer --DONE
+-- sort of unclear need to zoom in to actually see kelp persistence changes? -- brennie said intuitive
+-- explain why the circles change size --DONE
+-- change "month"" to "heatmaps" from radio buttons title -- DONE
+-- change color of title on tab 3, change to md? --no, I actually like it white. 
+
+
+
+
+
+
 --------------------------------------------------------------------------------------------------------------
 THINGS THAT ARE DONE:
 - all raster map pngs are created (and rae fixed them) and in /www folder
@@ -45,12 +65,6 @@ THINGS THAT NEED TO BE DONE
 
 -------------------------------------------------------------------------------------------------------------
 OTHER PROGRESS NOTES
-
-- everything currently made is combined together as of 10:45 am 3/9
-- app is currently crashing because it cannot load data ONLY IN THE FULL APP - mini (testing_clickable_map) is working fine
-- for some reason adding layerID = ~polygonID instead of ~unique(polygonID) deletes several polygons
-- months are in the wrong order
--coercing ggplot to geom_line is not working, consider switching to plotly
 
 
 

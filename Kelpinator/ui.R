@@ -20,7 +20,7 @@ shinyUI( navbarPage("Kelpinator",
                    tabPanel("California Kelp Biomass Explorer",
                             
                             # plot the map
-                            leafletOutput("harvestbedmap", height = 623),
+                            leafletOutput("harvestbedmap", height = 653),
                            
                             # add the header/info panel
                             absolutePanel(id = "description",
@@ -60,11 +60,11 @@ shinyUI( navbarPage("Kelpinator",
                             fluidRow(column(12,
                                             h2("Average expected monthly and annual biomass loss for kelp in the Santa Barbara Channel"),
           
-                                            h4("Use the radio buttons on the left to chose a month for visualizing kelp loss"),
+                                            h4("Use the radio buttons on the left to choose a month to visualize heatmaps of kelp biomass percent loss"),
                                             p())),
                             hr(),
                             fluidRow(sidebarPanel(width = 3,
-                                                  h4("Month"),
+                                                  h4("Heatmaps"),
                                                   helpText("Chose from the following:"),
                                                   
                                                   # input tab2

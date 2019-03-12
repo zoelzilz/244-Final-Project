@@ -2,12 +2,11 @@
 <center><h1><span style="color:CadetBlue"> Kelp Harvest Bed Explorer </span></h1></center>
 This map shows *Macrocystis pyrifera* beds in Southern California. Use the buttons in the bottom left to toggle between the following:
 
-1. Visualization of current kelp biomass in each historical kelp bed.
+1. Interactive visualization of kelp biomass loss due to wave activity throughout the year.
 
-2. Interactive visualization of kelp biomass loss due to wave activity throughout the year. 
+2. Visualization of current kelp biomass in each historical kelp bed.
 
-3. Persistence of kelp beds, calculated by taking proportion of years (1984 - 2018) where kelp canopy was observed in a 1 kilometer cell (as a fraction of the total area of the kelp in that cell).
-
+3. Proportional persistence of kelp beds (1984-2018).
 
 You can also choose to show or hide the historical kelp harvest beds.
 
