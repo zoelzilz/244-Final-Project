@@ -18,4 +18,4 @@ Giant kelp (Macrocystis pyrifera) biomass percent loss has been non-linearly rel
 
 ###How do I use it?
 Navigate through the app by clicking on the tabs at the top. Each tab provides further directions and additional information. 
-*Interactive map tab
+*Interactive map tab 
