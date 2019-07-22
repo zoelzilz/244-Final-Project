@@ -4,6 +4,7 @@ FUTURE TO DO:
 -- better SWH function (more constrained), work with Tom
 -- contact NREL re: duplicates, see if there has been a list generated or troubleshoot ourselves
 -- get graph output either to hide when toggling off the percent biomass layer OR put the outputs in the same graph box rather than just over the area which actually might clarify things a lot 
+- change order of tabs so rasters show first
 
 FINAL FIXES: 
 -- image isn't showing on mine, also make kelp image longer to fill space now longer with data section? or size is actually kinda good --DONE
